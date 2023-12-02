@@ -1,5 +1,5 @@
 from typing import List
-from keys import GOOGLE_MAPS_KEY
+from .keys import GOOGLE_MAPS_KEY
 
 import requests
 
