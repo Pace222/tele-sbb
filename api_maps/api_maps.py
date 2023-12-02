@@ -8,12 +8,13 @@ url = 'https://routes.googleapis.com/directions/v2:computeRoutes'
 
 
 # List[float] = [longitude, latitude]
+# Returns duration in Seconds (-1 if error)
 # TODO can also add travelMode: DRIVE, BICYCLE, WALK
-def dist_time_point_to_point(origin: List[float], destination: List[float]):
+def time_p2p(origin: List[float], destination: List[float]):
     headers = {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': GOOGLE_MAPS_KEY,
-        'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters'
+        'X-Goog-FieldMask': 'routes.duration'
     }
 
     data = {
@@ -42,7 +43,9 @@ def dist_time_point_to_point(origin: List[float], destination: List[float]):
 
     if response.status_code == 200:
         result = response.json()
-        return result
+        if result != {}:
+            return result['routes'][0]['duration'][:-1]
+        return -1
     else:
         print(f"Error: {response.status_code}\n{response.text}")
-        return {}
+        return -1
