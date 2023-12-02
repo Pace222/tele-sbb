@@ -45,4 +45,4 @@ def dist_time_point_to_point(origin: List[float], destination: List[float]):
         return result
     else:
         print(f"Error: {response.status_code}\n{response.text}")
-        return response
+        return {}
