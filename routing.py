@@ -68,9 +68,11 @@ def get_trips(origin: Union[str, List[float]], destination: Union[str, List[floa
     return [TripInfo(t['legs'], t['duration']) for t in trips]
 
 
-def sbb_p2p(origin: List[float], destination: List[float], date: str = None, time: str = None,
-            for_arrival: bool = False) -> int:
-    trips = get_trips(origin, destination, date, time, for_arrival)
+def sbb_p2p(origin: List[float], destination: List[float], date: str = None, time: str = None,) -> int:
+    trips = get_trips(origin, destination, date, time, for_arrival=True)
+    if len(trips) == 0:
+        return -1
+
     return min(trips, key=lambda t: t.duration).duration
 
 
@@ -90,7 +92,7 @@ def parking_dists_to_coords(r: float, user: UserInTrip):
 
 
 def parks_in_radius(r: float, user: UserInTrip) -> List[Parking]:
-    return PARKINGS[parking_dists_to_coords(r, user) < r].apply(lambda row: Parking(row), axis=1).to_list()
+    return PARKINGS[0 < parking_dists_to_coords(r, user) < r].apply(lambda row: Parking(row), axis=1).to_list()
 
 
 def optimal_station(users: List[UserInTrip]) -> Parking:
