@@ -71,10 +71,10 @@ def get_trip(origin: Union[str, List[float]], destination: Union[str, List[float
 
 def parking_dists_to_coords(r: float, user: UserInTrip):
     remaining_parks = PARKINGS['coords'][PARKINGS['coords'].apply(
-        lambda park_coords: direct_p2p_meters(user.location, park_coords)) < r * THEORETICAL_DIRECT_SPEED]
+        lambda park_coords: direct_p2p_meters(user.getLonLat(), park_coords)) < r * THEORETICAL_DIRECT_SPEED]
 
     if user.car:
-        return remaining_parks.apply(lambda park_coords: car_p2p(user.location, park_coords)[0])
+        return remaining_parks.apply(lambda park_coords: car_p2p(user.getLonLat(), park_coords)[0])
     else:
         # TODO: call SBB
         return
