@@ -106,3 +106,13 @@ def remove_user(user_id: str):
     with sqlite3.connect('state.sqlite') as con:
         con.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
         con.execute("DELETE FROM user_journeys WHERE user_id = ?", (user_id,))
+
+
+def print_all_db():
+    with sqlite3.connect('state.sqlite') as con:
+        res = con.execute("Select * from users").fetchall()
+        print(res)
+        res = con.execute("Select * from journeys").fetchall()
+        print(res)
+        res = con.execute("Select * from userjourneys").fetchall()
+        print(res)
