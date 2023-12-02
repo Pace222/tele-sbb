@@ -1,7 +1,7 @@
 
 class Journey:
     #
-    def __init__(self, journey_id, title, destination, deadline, users=None):
+    def __init__(self, journey_id, title, destination, deadline, users=None, plan=""):
         self.journey_id = journey_id
         self.title = title
         self.destination = destination
@@ -9,6 +9,7 @@ class Journey:
         if users is None:
             users = {}
         self.users = users
+        self.plan = plan
 
 
 
