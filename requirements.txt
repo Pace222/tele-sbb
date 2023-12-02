@@ -1,9 +1,2 @@
 python-telegram-bot[job-queue] --pre
-librosa
-pdfrw
 requests
-numpy
-scipy
-Pillow
-transformers
-torch
