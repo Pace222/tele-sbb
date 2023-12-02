@@ -6,7 +6,7 @@ class DistMapsTest(unittest.TestCase):
     # shows return value of store operations...
     def test_sample_distance_time(self):
 
-        response = maps.time_point_to_point([46.538480, 6.611124], [46.510232, 6.657723])
+        response = maps.dist_time_point_to_point([46.538480, 6.611124], [46.510232, 6.657723])
 
         self.assertEqual("test", response)
 
