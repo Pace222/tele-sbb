@@ -9,7 +9,8 @@ def init_db():
     with sqlite3.connect('state.sqlite') as con:
         # Journey reference
         con.execute("CREATE TABLE IF NOT EXISTS journeys (journey_id TINYTEXT PRIMARY KEY, title TINYTEXT,"
-                    "destination TINYTEXT, deadline TINYTEXT, plan MEDIUMTEXT)")
+                    "destination TINYTEXT, deadline_month TINYTEXT, deadline_day TINYTEXT, deadline_time TINYTEXT,"
+                    "plan MEDIUMTEXT)")
 
         # Telegram user ID (if known)
         con.execute("CREATE TABLE IF NOT EXISTS users (user_id TINYTEXT PRIMARY KEY)")
@@ -24,14 +25,15 @@ def init_db():
 
 
 # IDEA: Generate journey_id from the telegram group ID
-def add_journey(journey_id: str, journey_text: str, destination: str, deadline: str, plan: str):
+def add_journey(journey_id: str, journey_text: str, destination: str, deadline_month: str, deadline_day: str,
+                deadline_time: str, plan: str):
     with sqlite3.connect('state.sqlite') as con:
-        con.execute("INSERT OR IGNORE INTO journeys VALUES (?, ?, ?, ?, ?)",
-                    (journey_id, journey_text, destination, deadline, plan))
+        con.execute("INSERT OR IGNORE INTO journeys VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (journey_id, journey_text, destination, deadline_month, deadline_day, deadline_time, plan))
 
 
 def add_journey_id(journey_id: str):
-    add_journey(journey_id, "", "", "", "")
+    add_journey(journey_id, "", "", "", "", "", "")
 
 
 def set_journey_title(journey_id: str, title: str):
@@ -44,9 +46,19 @@ def set_journey_destination(journey_id: str, destination: str):
         con.execute("UPDATE journeys SET destination = ? WHERE journey_id = ?", (destination, journey_id))
 
 
-def set_journey_deadline(journey_id: str, deadline: str):
+def set_journey_deadline_month(journey_id: str, deadline_month: str):
     with sqlite3.connect('state.sqlite') as con:
-        con.execute("UPDATE journeys SET deadline = ? WHERE journey_id = ?", (deadline, journey_id))
+        con.execute("UPDATE journeys SET deadline_month = ? WHERE journey_id = ?", (deadline_month, journey_id))
+
+
+def set_journey_deadline_day(journey_id: str, deadline_day: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE journeys SET deadline_day = ? WHERE journey_id = ?", (deadline_day, journey_id))
+
+
+def set_journey_deadline_time(journey_id: str, deadline_time: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE journeys SET deadline_time = ? WHERE journey_id = ?", (deadline_time, journey_id))
 
 
 def set_journey_plan(journey_id: str, plan: str):
