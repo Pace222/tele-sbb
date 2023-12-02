@@ -1,5 +1,6 @@
 import unittest
 import state.state as store
+from state.user_in_trip import UserInTrip
 
 
 class StateTest(unittest.TestCase):
@@ -20,6 +21,11 @@ class StateTest(unittest.TestCase):
 
         users = store.get_journey_users("test_journey_1")
         self.assertEqual("test location 2", users[1].location)
+
+    def test_set_parse_lon_lat_from_userintrip(self):
+        user = UserInTrip("test_user_1", "20,5")
+        user.setLonLat([46.538480, 6.611124])
+        self.assertEqual([46.538480, 6.611124], user.getLonLat())
 
 
 if __name__ == '__main__':
