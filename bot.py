@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 store.init_db()
 
 # Stages
-CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, DONE, WAIT_LOC, DEST, TIME = range(9)
+CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, WAIT_FOR_OTHERS, WAIT_LOC, DEST, TIME = range(9)
 location_strings = {}
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -142,6 +142,8 @@ async def plan_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     print("eyyyy")
+    planid = update.message.media_group_id
+    store.add_journey_id(planid)
     await update.message.reply_text('Welcome! Click the button below to select a date:', reply_markup=reply_markup)
     return CHOOSE_MONTH
 
@@ -191,7 +193,7 @@ async def dest(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
-    user_time = update.message.time
+    user_time = update.message.text
     return ConversationHandler.END
 
 # async def manage_loc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -250,13 +252,12 @@ def main() -> None:
                 MessageHandler(filters.LOCATION, location),
             ],
             DEST: [
-                MessageHandler(filters.LOCATION, dest),
+                MessageHandler(filters.TEXT, dest),
             ],
             TIME: [
-                MessageHandler(filters.LOCATION, time),
+                MessageHandler(filters.TEXT, time),
             ],
-            DONE: [
-
+            WAIT_FOR_OTHERS: [
             ]
         },
         fallbacks=[CommandHandler("start", start)],
