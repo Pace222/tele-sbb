@@ -27,7 +27,6 @@ from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler
-from telegram import KeyboardButtonRequestGeoLocation
 from keys import TELEGRAM_KEY
 
 # Enable logging
@@ -171,8 +170,16 @@ async def take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     return ConversationHandler.END
 
 async def int_take_geo_pos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.callback_query.edit_message_text("Where are you:")
+    await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
     return WAIT_LOC
+
+async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user
+    user_location = update.message.location
+    location_strings[user.id] = user_location
+    print(user_location)
+    print(location_strings)
+    return ConversationHandler.END
 
 # async def manage_loc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 #     """Plans a trip."""
@@ -225,6 +232,9 @@ def main() -> None:
             ],
             WAIT_STRING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, take_string)
+            ],
+            WAIT_LOC: [ 
+                MessageHandler(filters.LOCATION, location),
             ],
             DONE: [
 
