@@ -1,8 +1,8 @@
 import sqlite3
 from typing import List
 
-from journey import Journey
-from user_in_trip import UserInTrip
+from state.journey import Journey
+from state.user_in_trip import UserInTrip
 
 
 def init_db():
