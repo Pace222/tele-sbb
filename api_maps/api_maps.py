@@ -21,16 +21,16 @@ def car_p2p(origin: List[float], destination: List[float]):
         "origin": {
             "location": {
                 "latLng": {
-                    "latitude": origin[1],
-                    "longitude": origin[0]
+                    "latitude": origin[0],
+                    "longitude": origin[1]
                 }
             }
         },
         "destination": {
             "location": {
                 "latLng": {
-                    "latitude": destination[1],
-                    "longitude": destination[0]
+                    "latitude": destination[0],
+                    "longitude": destination[1]
                 }
             }
         },
