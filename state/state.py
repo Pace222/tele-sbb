@@ -114,5 +114,5 @@ def print_all_db():
         print(res)
         res = con.execute("Select * from journeys").fetchall()
         print(res)
-        res = con.execute("Select * from userjourneys").fetchall()
+        res = con.execute("Select * from user_journeys").fetchall()
         print(res)
