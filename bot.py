@@ -56,6 +56,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup=ForceReply(selective=True),
     )
 
+async def join(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
@@ -142,7 +145,8 @@ async def plan_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     print("eyyyy")
-    planid = update.message.media_group_id
+    planid = str(update.message.chat_id)
+    print(planid)
     store.add_journey_id(planid)
     store.print_all_db()
     await update.message.reply_text('Welcome! Click the button below to select a date:', reply_markup=reply_markup)
@@ -258,8 +262,33 @@ def main() -> None:
             TIME: [
                 MessageHandler(filters.TEXT, time),
             ],
-            WAIT_FOR_OTHERS: [
-            ]
+        },
+        fallbacks=[CommandHandler("start", start)],
+        allow_reentry=True
+    )
+
+    async def join_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        """Joins a trip."""
+        keyboard = [
+            [InlineKeyboardButton("Select Date", callback_data='select_month', pay=True)]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        print("eyyyy")
+        planid = str(update.message.chat_id)
+        print(planid)
+        store.add_journey_id(planid)
+        store.print_all_db()
+        await update.message.reply_text('Welcome! Click the button below to select a date:', reply_markup=reply_markup)
+        return CHOOSE_MONTH
+
+    conv_handler_join = ConversationHandler(
+        entry_points=[CommandHandler("join_trip", join_trip)],
+        states={
+            CHOOSE_MONTH: [
+                CallbackQueryHandler(select_month, pattern="^" + str("select_month") + "$"),
+            ],
+            CHOOSE_DAY: [
+              
         },
         fallbacks=[CommandHandler("start", start)],
         allow_reentry=True
