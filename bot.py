@@ -29,6 +29,8 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler
 from keys import TELEGRAM_KEY
 
+import state.state as store
+
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -38,8 +40,10 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+store.init_db()
+
 # Stages
-CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, DONE, WAIT_LOC = range(7)
+CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, DONE, WAIT_LOC, DEST, TIME = range(9)
 location_strings = {}
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -56,11 +60,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_text("Help!")
-
-
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
-    await update.message.reply_text(update.message.text + "mashizzle")
 
 async def select_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
@@ -166,8 +165,10 @@ async def int_take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     location_strings[update.message.from_user.id] = update.message.text
+    
     print(location_strings)
-    return ConversationHandler.END
+    await update.message.reply_text("Send me dest:")
+    return DEST
 
 async def int_take_geo_pos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
@@ -179,6 +180,18 @@ async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     location_strings[user.id] = user_location
     print(user_location)
     print(location_strings)
+    await update.message.reply_text("Send me dest:")
+    return DEST
+
+async def dest(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user
+    user_dest = update.message.text
+    await update.message.reply_text("At what time : (hh:mm) ")
+    return TIME
+
+async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user
+    user_time = update.message.time
     return ConversationHandler.END
 
 # async def manage_loc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -235,6 +248,12 @@ def main() -> None:
             ],
             WAIT_LOC: [ 
                 MessageHandler(filters.LOCATION, location),
+            ],
+            DEST: [
+                MessageHandler(filters.LOCATION, dest),
+            ],
+            TIME: [
+                MessageHandler(filters.LOCATION, time),
             ],
             DONE: [
 
