@@ -54,3 +54,20 @@ def get_journey_plan(journey_id: str):
 def get_journey_users(journey_id: str):
     with sqlite3.connect('state.db') as con:
         return con.execute("SELECT (user_id, location, car, car_capacity) FROM user_journeys WHERE journey_id = ?", (journey_id,)).fetchall()
+
+
+def remove_journey(journey_id: str):
+    with sqlite3.connect('state.db') as con:
+        con.execute("DELETE FROM journeys WHERE journey_id = ?", journey_id)
+        con.execute("DELETE FROM user_journeys WHERE journey_id = ?", journey_id)
+
+
+def remove_user_from_journey(user_id: str, journey_id: str):
+    with sqlite3.connect('state.db') as con:
+        con.execute("DELETE FROM user_journeys WHERE journey_id = ? AND user_id = ?", (journey_id, user_id))
+
+
+def remove_user(user_id: str):
+    with sqlite3.connect('state.db') as con:
+        con.execute("DELETE FROM users WHERE user_id = ?", user_id)
+        con.execute("DELETE FROM user_journeys WHERE user_id = ?", user_id)
