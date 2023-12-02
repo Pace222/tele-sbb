@@ -144,6 +144,7 @@ async def plan_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     print("eyyyy")
     planid = update.message.media_group_id
     store.add_journey_id(planid)
+    store.print_all_db()
     await update.message.reply_text('Welcome! Click the button below to select a date:', reply_markup=reply_markup)
     return CHOOSE_MONTH
 
