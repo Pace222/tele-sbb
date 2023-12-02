@@ -1,11 +1,13 @@
 
 class Journey:
     #
-    def __init__(self, journey_id, title, destination, deadline, users=None, plan=""):
+    def __init__(self, journey_id, title, destination, deadline_month, deadline_day, deadline_time, users=None, plan=""):
         self.journey_id = journey_id
         self.title = title
         self.destination = destination
-        self.deadline = deadline
+        self.deadline = deadline_month
+        self.deadline = deadline_day
+        self.deadline = deadline_time
         if users is None:
             users = {}
         self.users = users

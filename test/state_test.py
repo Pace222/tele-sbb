@@ -10,7 +10,8 @@ class StateTest(unittest.TestCase):
         store.add_user("test_user_1")
         store.add_user("test_user_2")
 
-        store.add_journey("test_journey_1", "test journey 1", "test destination 1", "test deadline 1", "")
+        store.add_journey("test_journey_1", "test journey 1", "test destination 1", "test deadline 1month",
+                          "test deadline 1day", "test deadline 1time", "")
         store.join_journey("test_user_1", "test_journey_1", "test location 1", True, 4)
         store.join_journey("test_user_2", "test_journey_1", "test location 2", False, 1)
         store.store_journey_plan("test_journey_1", "test plan 1")
