@@ -1,9 +1,8 @@
 import sqlite3
 from typing import List
 
-from state import user_in_trip
-from state.journey import Journey
-from state.user_in_trip import UserInTrip
+from journey import Journey
+from user_in_trip import UserInTrip
 
 
 def init_db():
@@ -29,6 +28,30 @@ def add_journey(journey_id: str, journey_text: str, destination: str, deadline: 
     with sqlite3.connect('state.sqlite') as con:
         con.execute("INSERT OR IGNORE INTO journeys VALUES (?, ?, ?, ?, ?)",
                     (journey_id, journey_text, destination, deadline, plan))
+
+
+def add_journey_id(journey_id: str):
+    add_journey(journey_id, "", "", "", "")
+
+
+def set_journey_title(journey_id: str, title: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE journeys SET title = ? WHERE journey_id = ?", (title, journey_id))
+
+
+def set_journey_destination(journey_id: str, destination: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE journeys SET destination = ? WHERE journey_id = ?", (destination, journey_id))
+
+
+def set_journey_deadline(journey_id: str, deadline: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE journeys SET deadline = ? WHERE journey_id = ?", (deadline, journey_id))
+
+
+def set_journey_plan(journey_id: str, plan: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE journeys SET plan = ? WHERE journey_id = ?", (plan, journey_id))
 
 
 # IDEA: Generate user_id from the telegram user ID
