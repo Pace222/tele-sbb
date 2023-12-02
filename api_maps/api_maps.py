@@ -44,7 +44,7 @@ def car_p2p(origin: List[float], destination: List[float]):
     if response.status_code == 200:
         result = response.json()
         if result != {}:
-            return result['routes'][0]['duration'][:-1]
+            return int(result['routes'][0]['duration'][:-1])
         return -1
     else:
         print(f"Error: {response.status_code}\n{response.text}")
