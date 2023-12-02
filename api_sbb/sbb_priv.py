@@ -1,11 +1,23 @@
-from typing import List, Union
+from math import radians, sin, cos, atan2, sqrt
+
+import os
+from typing import List
+
+import pandas as pd
 
 import requests
 
-API_URL = "https://journey-service-int.api.sbb.ch"
-CLIENT_SECRET = ""
-CLIENT_ID = ""
-SCOPE = ""
+# TODO: filter duplicates
+PARKINGS: pd.DataFrame = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mobilitat.csv"),
+                                     delimiter=';')
+PARKINGS: pd.DataFrame = PARKINGS[PARKINGS['parkrail_anzahl'] > 0]
+PARKINGS['coords'] = PARKINGS['Geoposition'].str.split(',').apply(lambda x: [float(coord) for coord in x])
+PARKINGS = PARKINGS.drop(columns='Geoposition')
+
+API_URL: str = "https://journey-service-int.api.sbb.ch"
+CLIENT_SECRET: str = ""
+CLIENT_ID: str = ""
+SCOPE: str = ""
 
 
 def get_token():
@@ -35,3 +47,11 @@ def get_id_by_name(auth: str, place: str):
     else:
         return place_ids[0]['id']
 
+def direct_p2p_meters(coords1: List[float], coords2: List[float]):
+    R = 6371  # Earth radius in kilometers
+    dlat = radians(coords2[1] - coords1[1])
+    dlon = radians(coords2[0] - coords1[0])
+    a = sin(dlat / 2) ** 2 + cos(radians(coords1[1])) * cos(radians(coords2[1])) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = R * c
+    return distance

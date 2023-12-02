@@ -11,5 +11,7 @@ class Journey:
         self.users = users
         self.plan = plan
 
+    def __str__(self):
+        return f"Journey {self.title} to {self.destination} with {len(self.users)} users"
 
 

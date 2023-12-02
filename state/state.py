@@ -1,4 +1,9 @@
 import sqlite3
+from typing import List
+
+from state import user_in_trip
+from state.journey import Journey
+from state.user_in_trip import UserInTrip
 
 
 def init_db():
@@ -33,7 +38,7 @@ def add_user(user_id: str):
         con.execute("INSERT OR IGNORE INTO users VALUES(?)", (user_id,))
 
 
-def join_journey(user_id: str, journey_id: str, start_location, car=False,  car_capacity=1):
+def join_journey(user_id: str, journey_id: str, start_location, car=False, car_capacity=1):
     with sqlite3.connect('state.sqlite') as con:
         con.execute("INSERT OR IGNORE INTO users VALUES(?)", (user_id,))
         con.execute("INSERT OR REPLACE INTO user_journeys VALUES (?, ?, ?, ?, ?)",
@@ -45,20 +50,22 @@ def store_journey_plan(journey_id: str, plan: str):
         con.execute("UPDATE journeys SET plan = ? WHERE journey_id = ?", (plan, journey_id))
 
 
-def get_journey(journey_id: str):
+def get_journey(journey_id: str) -> Journey:
     with sqlite3.connect('state.sqlite') as con:
-        return con.execute("SELECT * FROM journeys WHERE journey_id = ?", (journey_id,)).fetchone()
+        res = con.execute("SELECT * FROM journeys WHERE journey_id = ?", (journey_id,)).fetchone()
+        return Journey(*res)
 
 
-def get_journey_plan(journey_id: str):
+def get_journey_plan(journey_id: str) -> str:
     with sqlite3.connect('state.sqlite') as con:
         return con.execute("SELECT plan FROM journeys WHERE journey_id = ?", (journey_id,)).fetchone()
 
 
-def get_journey_users(journey_id: str):
+def get_journey_users(journey_id: str) -> List[UserInTrip]:
     with sqlite3.connect('state.sqlite') as con:
-        return con.execute("SELECT user_id, location, car, car_capacity FROM user_journeys WHERE journey_id = ?",
-                           (journey_id,)).fetchall()
+        res = con.execute("SELECT user_id, location, car, car_capacity FROM user_journeys WHERE journey_id = ?",
+                          (journey_id,)).fetchall()
+        return [UserInTrip(*r) for r in res]
 
 
 def remove_journey(journey_id: str):

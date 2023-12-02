@@ -15,11 +15,11 @@ class StateTest(unittest.TestCase):
         store.store_journey_plan("test_journey_1", "test plan 1")
 
         journey = store.get_journey("test_journey_1")
-        self.assertEqual(('test_journey_1', 'test journey 1', 'test destination 1',
-                          'test deadline 1', 'test plan 1'), journey)
+
+        self.assertEqual('test journey 1', journey.title)
 
         users = store.get_journey_users("test_journey_1")
-        self.assertEqual([('test_user_1', 'test location 1', 1, 4), ('test_user_2', 'test location 2', 0, 1)], users)
+        self.assertEqual("test location 2", users[1].location)
 
 
 if __name__ == '__main__':

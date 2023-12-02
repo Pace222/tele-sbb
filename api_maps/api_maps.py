@@ -10,7 +10,7 @@ url = 'https://routes.googleapis.com/directions/v2:computeRoutes'
 # List[float] = [longitude, latitude]
 # Returns duration in Seconds (-1 if error)
 # TODO can also add travelMode: DRIVE, BICYCLE, WALK
-def time_p2p(origin: List[float], destination: List[float]):
+def car_p2p(origin: List[float], destination: List[float]):
     headers = {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': GOOGLE_MAPS_KEY,
