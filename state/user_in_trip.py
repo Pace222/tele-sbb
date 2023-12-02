@@ -8,8 +8,8 @@ class UserInTrip:
         self.car = car
         self.car_capacity = car_capacity
 
-    def getLonLat(self) -> List[float]:
+    def getLatLon(self) -> List[float]:
         return [float(loc) for loc in self.location.split(",")]
 
-    def setLonLat(self, location: List[float]):
+    def setLatLon(self, location: List[float]):
         self.location = ",".join([str(loc) for loc in location])
