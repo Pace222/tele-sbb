@@ -54,4 +54,4 @@ def direct_p2p_meters(coords1: List[float], coords2: List[float]):
     a = sin(dlat / 2) ** 2 + cos(radians(coords1[1])) * cos(radians(coords2[1])) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     distance = R * c
-    return distance
+    return distance * 1000
