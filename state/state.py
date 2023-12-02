@@ -123,8 +123,13 @@ def remove_user(user_id: str):
 def print_all_db():
     with sqlite3.connect('state.sqlite') as con:
         res = con.execute("Select * from users").fetchall()
+        print("--- Users:")
         print(res)
+
+        print("--- Journeys:")
         res = con.execute("Select * from journeys").fetchall()
         print(res)
+
+        print("--- User Journeys:")
         res = con.execute("Select * from user_journeys").fetchall()
         print(res)
