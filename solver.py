@@ -67,7 +67,7 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     instructions = [f"=== Trip to: {final_train.end} ===\n\nPassengers will first meet-up at {parking.name}:\n"]
 
     print("Drivers:")
-    print(drivers)
+    print(drivers.items())  # TODO remove
     # Driver
     for driver, (start_time, passengers_n_time) in drivers.items():
         #  (check how many passengers)
