@@ -30,6 +30,7 @@ def solve_planning(journey_id: str) -> \
 
         # dict[driver, tuple[start_time, list[tuple[passenger, pick_up_time]]]]
         drivers_sol: Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]] = share_cars(users, parking, date, time)
+        print(drivers_sol.items())
 
         user_plan_v2 = []
 
@@ -119,9 +120,9 @@ def cleanerTime(time: str):
 
 def id_to_nametag(user_id: str) -> str:
     if user_id in cached_id_names:
-        return cached_id_names[user_id]
+        return '@' + cached_id_names[user_id]
     else:
         name = store.get_user_name(user_id)
         cached_id_names[user_id] = name
-        return name
+        return '@' + name
 
