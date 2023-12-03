@@ -28,6 +28,8 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler
 from keys import TELEGRAM_KEY
+from solver import *
+from telegram import sendP
 
 import state.state as store
 
@@ -230,7 +232,7 @@ async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.edit_message_text(text="next time")
     return ConversationHandler.END
 
-WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END = range(5)
+WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END, COMPUTE = range(6)
 
 async def join_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Plans a trip."""
@@ -254,7 +256,13 @@ async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     location_strings[update.message.from_user.id] = update.message.text
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
     store.print_all_db()
-    
+    cnt = store.count_journey_users(str(update.message.chat_id))
+    if (cnt >= 3):
+        a = solve_planning(str(update.message.chat_id))
+        if a is not None:
+            plan, train_card = prepare_planning_v1(a)
+        await update.message.reply_text(str(plan))
+        await update.message.reply_photo(train_card)
     return ConversationHandler.END
 
 async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -265,6 +273,13 @@ async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # print(location_strings)
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), str(update.message.location), car=False, car_capacity=1)
     store.print_all_db()
+    cnt = store.count_journey_users(str(update.message.chat_id))
+    if (cnt >= 3):
+        a = solve_planning(str(update.message.chat_id))
+        if a is not None:
+            plan, train_card = prepare_planning_v1(a)
+        await update.message.reply_text(str(plan))
+        await update.message.reply_photo(train_card)
     return ConversationHandler.END
 
 async def int_take_geo_pos_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -336,6 +351,9 @@ def main() -> None:
             ],
             WAIT_LOC_SPEC: [ 
                 MessageHandler(filters.LOCATION, location_spec),
+            ],
+            COMPUTE: [
+
             ]
         },
         fallbacks=[CommandHandler("start", start)],
