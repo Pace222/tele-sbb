@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from api_sbb.sbb_priv import API_URL, PARKINGS, get_token, get_id_by_name, direct_p2p_meters, minus_times
-from typing import List, Union, Tuple, Optional
+from typing import List, Union, Tuple, Optional, Dict
 
 import requests
 
