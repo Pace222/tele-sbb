@@ -13,7 +13,7 @@ def init_db():
                     "plan MEDIUMTEXT)")
 
         # Telegram user ID (if known)
-        con.execute("CREATE TABLE IF NOT EXISTS users (user_id TINYTEXT PRIMARY KEY)")
+        con.execute("CREATE TABLE IF NOT EXISTS users (user_id TINYTEXT PRIMARY KEY, user_name TINYTEXT)")
 
         # For a journey, a user takes part from a start location, with a car (optional) of a certain capacity
         con.execute("CREATE TABLE IF NOT EXISTS user_journeys (user_id TINYTEXT, journey_id TINYTEXT,"
@@ -67,10 +67,15 @@ def set_journey_plan(journey_id: str, plan: str):
 
 
 # IDEA: Generate user_id from the telegram user ID
-def add_user(user_id: str):
+def add_user(user_id: str, user_name: str = ""):
     with sqlite3.connect('state.sqlite') as con:
         # Ignore if user already exists
-        con.execute("INSERT OR IGNORE INTO users VALUES(?)", (user_id,))
+        con.execute("INSERT OR IGNORE INTO users VALUES(?, ?)", (user_id, user_name))
+
+
+def set_user_name(user_id: str, user_name: str):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE users SET user_name = ? WHERE user_id = ?", (user_name, user_id))
 
 
 def join_journey(user_id: str, journey_id: str, start_location, car=False, car_capacity=1):
