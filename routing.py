@@ -155,16 +155,16 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
     finished = {}
     for u in users:
         if u.car:
-            candidates = [(neigh, car_p2p(u.getLatLon(), neigh.getLatLon())) for neigh in users if not neigh.car]
-            if len(candidates) == 0:
-                finished[u] = True
-                continue
-
-            neighs_dists_per_car[u] = min(candidates, key=lambda tup: tup[1])
             cargo_per_car[u] = []
             car_past[u] = {}
             already_in_car.append(u)
             finished[u] = False
+
+            candidates = [(neigh, car_p2p(u.getLatLon(), neigh.getLatLon())) for neigh in users if not neigh.car]
+            if len(candidates) == 0:
+                finished[u] = True
+                continue
+            neighs_dists_per_car[u] = min(candidates, key=lambda tup: tup[1])
         else:
             pt_time[u] = sbb_p2p(u.getLatLon(), parking.coords, date, time)
 
