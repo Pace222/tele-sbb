@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import radians, sin, cos, atan2, sqrt
 
 import os
@@ -9,7 +9,6 @@ import pytz
 
 import requests
 
-# TODO: filter duplicates
 PARKINGS: pd.DataFrame = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mobilitat.csv"),
                                      delimiter=';')
 PARKINGS: pd.DataFrame = PARKINGS[PARKINGS['parkrail_anzahl'] > 0]
@@ -63,3 +62,8 @@ def minus_times(final_date: str, final_time: str, start_date_time: str):
     final_combined = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").astimezone(pytz.timezone('Europe/Zurich'))
     start_combined = datetime.fromisoformat(start_date_time)
     return final_combined - start_combined
+
+def plus_times(start_date: str, start_time: str, seconds_to_add: int):
+    datetime_str = f"{start_date} {start_time}"
+    start_combined = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").astimezone(pytz.timezone('Europe/Zurich'))
+    return start_combined + timedelta(seconds=seconds_to_add)

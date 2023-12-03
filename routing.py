@@ -124,12 +124,10 @@ def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None)
 
     best_parking = Parking(PARKINGS.loc[max(distances_to_park, key=custom_max)])
 
-    datetime_str = f"{date if date else datetime.now().date()} {time}"
-    combined_dt = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
     leave = []
     for u in users:
         if u.car:
-            t = combined_dt - timedelta(seconds=car_p2p(u.getLatLon(), best_parking.coords))
+            t = plus_times(date, time, -car_p2p(u.getLatLon(), best_parking.coords))
             leave_date = t.strftime("%Y-%m-%d")
             leave_time = t.strftime("%H:%M")
             leave.append((leave_date, leave_time))
@@ -139,7 +137,7 @@ def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None)
     return best_parking, leave
 
 
-def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) -> Dict[UserInTrip, List[UserInTrip]]:
+def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) -> Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]]:
     pt_time = {}
     neighs_dists_per_car = {}
     cargo_per_car = {}
@@ -165,9 +163,9 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
                 closest_neigh, closest_dist = neighs_dists_per_car[u]
                 alternative = car_p2p(closest_neigh.getLatLon(), parking.coords)
                 if alternative < pt_time[closest_neigh] and all(
-                        closest_dist - car_past[u][passenger] + alternative < pt_time[passenger] for passenger in
+                        closest_dist - car_past[u][passenger] + alternative < pt_time[passenger] for passenger, _ in
                         cargo_per_car[u]):
-                    cargo_per_car[u].append(closest_neigh)
+                    cargo_per_car[u].append((closest_neigh, alternative))
                     car_past[u][closest_neigh] = closest_dist
                     already_in_car.append(closest_neigh)
                 else:
@@ -177,7 +175,19 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
                     [(neigh, closest_dist + car_p2p(closest_neigh.getLatLon(), neigh.getLatLon()))
                      for neigh in users if neigh not in already_in_car], key=lambda tup: tup[1])
 
-    return cargo_per_car
+    timings_per_driver = {}
+    for driver, passengers in cargo_per_car.items():
+        if len(passengers) == 0:
+            start = plus_times(date, time, -car_p2p(driver.getLatLon(), parking.coords))
+        else:
+            start = plus_times(date, time, -sum([d for n, d in car_past[driver].items()]) - passengers[-1][1])
+        passenger_timings = []
+        for p, dt in zip(passengers, car_past[driver]):
+            time = start + timedelta(seconds=dt)
+            passenger_timings.append((p, time.strftime("%Y-%m-%d %H:%M")))
+        timings_per_driver[driver] = (start.strftime("%Y-%m-%d %H:%M"), passenger_timings)
+
+    return timings_per_driver
 
 
 if __name__ == '__main__':
