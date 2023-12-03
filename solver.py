@@ -27,7 +27,8 @@ def solve_planning(journey_id: str) -> \
     else:
         parking = solution_v1[0]
 
-        drivers_sol: dict[UserInTrip, tuple[str, list[tuple[UserInTrip, str]]]] = share_cars(users, parking, date, time)
+        # dict[driver, tuple[start_time, list[tuple[passenger, pick_up_time]]]]
+        drivers_sol: Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]] = share_cars(users, parking, date, time)
 
         user_plan_v2 = []
 
@@ -59,7 +60,7 @@ def solve_planning(journey_id: str) -> \
         return journey, parking, drivers_sol, user_plan_v2, final_train
 
 
-def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, tuple[str, list[tuple[UserInTrip, str]]]],
+def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]],
                         user_plan: List[Tuple[UserInTrip, Union[Tuple[str, str], TripInfo, Tuple[UserInTrip, str]]]],
                         final_train):
     dest_name = parking.name
