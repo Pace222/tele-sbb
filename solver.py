@@ -8,7 +8,7 @@ from visual.train_card_gen import generate_train_card
 
 
 def solve_planning(journey_id: str) -> \
-        Optional[Tuple[Journey, Parking, Dict[UserInTrip, tuple[str, list[tuple[UserInTrip, str]]]], List[Tuple[
+        Optional[Tuple[Journey, Parking, Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]], List[Tuple[
             UserInTrip, Union[Tuple[str, str], TripInfo, Tuple[UserInTrip, str]]]], TripInfo]]:
     journey = store.get_journey(journey_id)
     users = store.get_journey_users(journey_id)
@@ -32,14 +32,14 @@ def solve_planning(journey_id: str) -> \
         user_plan_v2 = []
 
         # Collect passengers
-        passengers = []
+        passengers_n_drivers = []
         for car_driver, car_passengers in drivers_sol.items():
             for car_passenger, _ in car_passengers[1]:
-                passengers.append(car_passenger)
+                passengers_n_drivers.append(car_passenger)
 
         # Use TP for non (car driver or passenger)
         for user, tp_plan in zip(users, solution_v1[1]):
-            if user not in passengers:
+            if user not in passengers_n_drivers:
                 user_plan_v2.append((user, tp_plan))
 
         # Inform passengers of their driver
@@ -85,8 +85,8 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, tuple[str, l
             via_string = ""
             if len(trip.stops) > 2:
                 via_string = ', via: ' + ','.join([s[0] for s in trip.stops[1:-1]])
-            instructions.append(f"[{user_name}] Public transport - From:{trip.start} @ {cleanerTime(trip.start_time)} to {trip.end} "
-                                f"@ {cleanerTime(trip.stop_time)}{via_string}\n")
+            instructions.append(f"[{user_name}] Public transport - From:{trip.start} @ {cleanerTime(trip.start_time)} "
+                                f"to {trip.end} @ {cleanerTime(trip.stop_time)}{via_string}\n")
         else:
             # Case of passenger
             instructions.append(f"[{user_name}] Car sharing (passenger), driver = [{trip[0]}], pick-up from:"
