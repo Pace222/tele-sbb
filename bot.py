@@ -357,6 +357,8 @@ async def tell_us(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(str(plan))
         await update.message.reply_photo(train_card)
         store.flush_db()
+    else:
+        await update.message.reply_text(str("Could not find a plan, sorry..."))
 
 def main() -> None:
     """Start the bot."""
