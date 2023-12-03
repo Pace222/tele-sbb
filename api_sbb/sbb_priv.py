@@ -32,7 +32,7 @@ def get_token():
                          data=params).json()
 
 
-def get_id_by_name(auth: str, place: str):
+def get_coords_by_name(auth: str, place: str):
     headers = {
         'Authorization': f"Bearer {auth}",
         'accept': 'application/json',
@@ -44,7 +44,7 @@ def get_id_by_name(auth: str, place: str):
     }
     place_ids = requests.get(f"{API_URL}/v3/places", headers=headers, params=content).json()['places']
     if len(place_ids) == 0:
-        raise ValueError("Invalid origin")
+        raise ValueError("Invalid place")
     else:
         return place_ids[0]['centroid']['coordinates'][::-1]
 
