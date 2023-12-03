@@ -56,9 +56,12 @@ def get_trips(origin: Union[str, List[float]], destination: Union[str, List[floa
     if time is not None:
         content["time"] = time
 
-    trips = requests.post(f"{API_URL}/v3/trips/by-origin-destination", headers=headers, json=content).json()["trips"]
 
-    return [TripInfo(t['legs']) for t in trips]
+    trips = requests.post(f"{API_URL}/v3/trips/by-origin-destination", headers=headers, json=content).json()
+    if "trips" not in trips:
+        return []
+    return [TripInfo(t['legs']) for t in trips["trips"]]
+
 
 
 def sbb_p2p(origin: List[float], destination: List[float], date: str = None, time: str = None) -> int:
@@ -93,6 +96,7 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str):
 #    return park_to_coords[(0 < park_to_coords) & (park_to_coords < r)].apply(lambda row: Parking(row), axis=1).to_list()
 
 
+# Union[Tuple[str,str], TripInfo]]
 def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None) -> Optional[
     Tuple[Parking, List[Union[Tuple[str, str], TripInfo]]]]:
     dists_users_parks = {u: parking_dists_to_coords(u, date, time) for u in users}
@@ -176,9 +180,8 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str):
 
 
 if __name__ == '__main__':
-    users = [UserInTrip("1", "1", car=0), UserInTrip("2", "2", car=1, car_capacity=6),
-             UserInTrip("3", "3", car=0), UserInTrip("4", "4", car=0), UserInTrip("5", "5", car=0)]
-    pk = Parking(PARKINGS.iloc[1])
-    pk.coords = "PARK"
-    cargo = share_cars(users, pk, date="2023-12-02", time="21:00")
-    print({u.user_id: [c.user_id for c in cs] for u, cs in cargo.items()})
+    users = [UserInTrip("1", "47.531271, 7.636413", car=1), UserInTrip("2", "47.552954, 7.584171", car=1),
+             UserInTrip("3", "47.562917, 7.601509", car=0)]
+    station = optimal_parking(users, time="21:00")
+    print(station[0].name)
+    print(station[1])
