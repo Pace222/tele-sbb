@@ -6,6 +6,7 @@ from state.journey import Journey
 from state.user_in_trip import UserInTrip
 from visual.train_card_gen import generate_train_card
 
+cached_id_names = {}
 
 def solve_planning(journey_id: str) -> \
         Optional[Tuple[Journey, Parking, Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]], List[Tuple[
@@ -72,10 +73,11 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     for driver, (start_time, passengers_n_time) in drivers.items():
         #  (check how many passengers)
         if len(passengers_n_time) == 0:
-            instructions.append(f"[{driver.user_id}] Drive - from {driver.location} to {dest_name} P+R\n")
+            instructions.append(f"[{id_to_nametag(driver.user_id)}] Drive - from {driver.location} to {dest_name} P+R\n")
         else:
-            passengers_text = ' - ' + ' - \n'.join([f"{p.user_id} @ {cleanerTime(t)}" for p, t in passengers_n_time])
-            instructions.append(f"[{driver.user_id}] Car sharing (driver) - From: {driver.location} @ "
+            passengers_text = ' - ' + ' - \n'.join([f"{id_to_nametag(p.user_id)} @ "
+                                                    f"{cleanerTime(t)}" for p, t in passengers_n_time])
+            instructions.append(f"[{id_to_nametag(driver.user_id)}] Car sharing (driver) - From: {driver.location} @ "
                                 f"{cleanerTime(start_time)}, "
                                 f" To: {dest_name}"  # @ {trip.stop_time}"  # TODO add arrival time also??
                                 f"Pick-up passengers:\n{passengers_text}\n")
@@ -83,7 +85,7 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     # Passengers or TP
 
     for user, trip in user_plan:
-        user_name = user.user_id  # TODO update user registration with name...
+        user_name = id_to_nametag(user.user_id)  # TODO update user registration with name...
         if isinstance(trip, TripInfo):
             # Public transportation user
             via_string = ""
@@ -113,3 +115,13 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
 # No date no UTC...
 def cleanerTime(time: str):
     return time[11:-6]
+
+
+def id_to_nametag(user_id: str) -> str:
+    if user_id in cached_id_names:
+        return cached_id_names[user_id]
+    else:
+        name = store.get_user_name(user_id)
+        cached_id_names[user_id] = name
+        return name
+
