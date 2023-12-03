@@ -222,14 +222,35 @@ async def dest(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     user_time = update.message.text
+    keyboard = [
+        [InlineKeyboardButton("Yes", callback_data='have_car', pay=True),
+         InlineKeyboardButton("No", callback_data='no_car', pay=True)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     store.set_journey_deadline_time(str(update.message.chat_id), user_time)
     store.print_all_db()
+    await update.message.reply_text(text='Do you have a car ? ', reply_markup=reply_markup)
     return CAR_MAYBE
 
 async def have_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    user = update.message.from_user
-    user_time = update.message.text
+    # user = update.callback_query.from_user
+    # user_time = update.message.text
+    await update.callback_query.edit_message_text(text='What is your capacity ?')
+    return CAR_WIEVIEL
+
+async def handle_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user.id 
+    jrn = update.message.chat_id
+    numm = update.message.text 
+    store.update_user_car(user, jrn, True)
+    store.update_user_car_capacity(user, jrn, int(numm))
     store.print_all_db()
+    return ConversationHandler.END
+
+async def no_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    store.update_user_car(update.callback_query.from_user.id, update.callback_query.message.chat_id, False)
+    store.print_all_db()
+    await update.callback_query.edit_message_text(text='Poor')
     return ConversationHandler.END
 
 WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END, COMPUTE = range(6)
@@ -331,6 +352,13 @@ def main() -> None:
             TIME: [
                 MessageHandler(filters.TEXT, time),
             ],
+            CAR_MAYBE: [
+                CallbackQueryHandler(have_car, pattern="^"+str("have_car")+"$"),
+                CallbackQueryHandler(no_car, pattern="^"+str("no_car")+"$")
+            ],
+            CAR_WIEVIEL: [
+                MessageHandler(filters.TEXT, handle_car)
+            ]
         },
         fallbacks=[CommandHandler("start", start)],
         allow_reentry=True
