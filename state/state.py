@@ -78,9 +78,14 @@ def set_user_name(user_id: str, user_name: str):
         con.execute("UPDATE users SET user_name = ? WHERE user_id = ?", (user_name, user_id))
 
 
+def get_user_name(user_id: str) -> str:
+    with sqlite3.connect('state.sqlite') as con:
+        return con.execute("SELECT user_name FROM users WHERE user_id = ?", (user_id,)).fetchone()[0]
+
+
 def join_journey(user_id: str, journey_id: str, start_location, car=False, car_capacity=1):
     with sqlite3.connect('state.sqlite') as con:
-        con.execute("INSERT OR IGNORE INTO users VALUES(?)", (user_id,))
+        con.execute("INSERT OR IGNORE INTO users VALUES(?, ?)", (user_id, ""))
         con.execute("INSERT OR REPLACE INTO user_journeys VALUES (?, ?, ?, ?, ?)",
                     (user_id, journey_id, start_location, car, car_capacity))
 
