@@ -2,3 +2,4 @@ python-telegram-bot[job-queue] --pre
 requests
 pandas
 isodate
+pillow
