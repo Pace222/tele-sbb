@@ -138,58 +138,6 @@ def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None)
 
 
 def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str):
-    def car_p2p(c1, c2):
-        if c1 == "1" and c2 == "PARK":
-            return 2
-        if c1 == "2" and c2 == "1":
-            return 50
-        if c1 == "2" and c2 == "3":
-            return 5
-        if c1 == "2" and c2 == "4":
-            return 7
-        if c1 == "2" and c2 == "5":
-            return 17
-        if c1 == "3" and c2 == "1":
-            return 52
-        if c1 == "3" and c2 == "2":
-            return 5
-        if c1 == "3" and c2 == "PARK":
-            return 20
-        if c1 == "3" and c2 == "4":
-            return 10
-        if c1 == "3" and c2 == "5":
-            return 13
-        if c1 == "4" and c2 == "1":
-            return 60
-        if c1 == "4" and c2 == "2":
-            return 13
-        if c1 == "4" and c2 == "3":
-            return 10
-        if c1 == "4" and c2 == "PARK":
-            return 5
-        if c1 == "4" and c2 == "5":
-            return 5
-        if c1 == "5" and c2 == "1":
-            return 60
-        if c1 == "5" and c2 == "2":
-            return 15
-        if c1 == "5" and c2 == "3":
-            return 12
-        if c1 == "5" and c2 == "4":
-            return 5
-        if c1 == "5" and c2 == "PARK":
-            return 15
-    def sbb_p2p(c1, c2, d, t):
-        if c1 == "1" and c2 == "PARK":
-            return 10
-        if c1 == "3" and c2 == "PARK":
-            return 31
-        if c1 == "4" and c2 == "PARK":
-            return 45
-        if c1 == "5" and c2 == "PARK":
-            return 40
-
-
     pt_time = {}
     neighs_dists_per_car = {}
     cargo_per_car = {}
@@ -198,14 +146,14 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str):
     finished = {}
     for u in users:
         if u.car:
-            neighs_dists_per_car[u] = min([(neigh, car_p2p(u.location, neigh.location))
+            neighs_dists_per_car[u] = min([(neigh, car_p2p(u.getLatLon(), neigh.getLatLon()))
                                            for neigh in users if neigh != u and not neigh.car], key=lambda tup: tup[1])
             cargo_per_car[u] = []
             car_past[u] = {}
             already_in_car.append(u)
             finished[u] = False
         else:
-            pt_time[u] = sbb_p2p(u.location, parking.coords, date, time)
+            pt_time[u] = sbb_p2p(u.getLatLon(), parking.coords, date, time)
 
     while not all([finished[u] for u in users if u.car]):
         for u in users:
@@ -213,7 +161,7 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str):
                 finished[u] = True
             if u.car and not finished[u] and len(cargo_per_car[u]) < u.car_capacity - 1:
                 closest_neigh, closest_dist = neighs_dists_per_car[u]
-                alternative = car_p2p(closest_neigh.location, parking.coords)
+                alternative = car_p2p(closest_neigh.getLatLon(), parking.coords)
                 if alternative < pt_time[closest_neigh] and all(closest_dist - car_past[u][passenger] + alternative < pt_time[passenger] for passenger in cargo_per_car[u]):
                     cargo_per_car[u].append(closest_neigh)
                     car_past[u][closest_neigh] = closest_dist
@@ -221,7 +169,7 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str):
                 else:
                     finished[u] = True
                     break
-                neighs_dists_per_car[u] = min([(neigh, closest_dist + car_p2p(closest_neigh.location, neigh.location))
+                neighs_dists_per_car[u] = min([(neigh, closest_dist + car_p2p(closest_neigh.getLatLon(), neigh.getLatLon()))
                                                for neigh in users if neigh not in already_in_car], key=lambda tup: tup[1])
 
     return cargo_per_car
