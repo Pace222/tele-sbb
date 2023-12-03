@@ -36,6 +36,7 @@ def solve_planning(journey_id: str) -> \
         for car_driver, car_passengers in drivers_sol.items():
             for car_passenger, _ in car_passengers[1]:
                 passengers_n_drivers.append(car_passenger)
+            passengers_n_drivers.append(car_driver)
 
         # Use TP for non (car driver or passenger)
         for user, tp_plan in zip(users, solution_v1[1]):
@@ -64,6 +65,8 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, tuple[str, l
     dest_name = parking.name
     instructions = [f"=== Trip to: {final_train.end} ===\n\nPassengers will first meet-up at {parking.name}:\n"]
 
+    print("Drivers:")
+    print(drivers)
     # Driver
     for driver, (start_time, passengers_n_time) in drivers:
         #  (check how many passengers)
@@ -90,7 +93,7 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, tuple[str, l
         else:
             # Case of passenger
             instructions.append(f"[{user_name}] Car sharing (passenger), driver = [{trip[0]}], pick-up from:"
-                                f"{user.location} @ {cleanerTime(trip[1])}\n")
+                                f"{user.location} @ {trip[1]}\n")
 
     instructions.append(f"[Final] Public transport - From:{final_train.start} @ {cleanerTime(final_train.start_time)} "
                         f"to {final_train.end} @ {cleanerTime(final_train.stop_time)}")
