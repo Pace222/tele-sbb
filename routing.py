@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 
-from api_sbb.sbb_priv import API_URL, PARKINGS, get_token, get_id_by_name, direct_p2p_meters, minus_times, plus_times
+from api_sbb.sbb_priv import API_URL, PARKINGS, get_token, get_coords_by_name, direct_p2p_meters, minus_times, \
+    plus_times
 from typing import List, Union, Tuple, Optional, Dict
 
 import requests
@@ -42,9 +43,9 @@ def get_trips(origin: Union[str, List[float]], destination: Union[str, List[floa
         'Content-Type': 'application/json'
     }
     if type(origin) == str:
-        origin = get_id_by_name(auth, origin)
+        origin = get_coords_by_name(auth, origin)
     if type(destination) == str:
-        destination = get_id_by_name(auth, destination)
+        destination = get_coords_by_name(auth, destination)
 
     content = {
         "origin": str(origin[::-1]),
@@ -70,8 +71,11 @@ def sbb_p2p(origin: List[float], destination: List[float], date: str, time: str)
     return min([minus_times(date, time, t.start_time) for t in trips]).seconds
 
 
-def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination: Union[str, List[float]], for_arrival: bool = False):
-    remaining_parks = PARKINGS['coords'].loc[PARKINGS['coords'].apply(lambda park_coords: direct_p2p_meters(user.getLatLon(), park_coords)).nsmallest(MAX_PARKINGS).index]
+def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination: Union[str, List[float]],
+                            for_arrival: bool = False):
+    remaining_parks = PARKINGS['coords'].loc[
+        PARKINGS['coords'].apply(lambda park_coords: direct_p2p_meters(user.getLatLon(), park_coords)).nsmallest(
+            MAX_PARKINGS).index]
 
     if user.car:
         dists = remaining_parks.apply(lambda park_coords: car_p2p(user.getLatLon(), park_coords))
@@ -84,13 +88,15 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination:
             return dists
         else:
             def dists_from_coords(park_coords):
-                start_time = datetime.fromisoformat(get_trips(park_coords, destination, date, time, for_arrival=True)[-1].start_time)
+                trip = get_trips(park_coords, destination, date, time, for_arrival=True)[-1]
+                start_time = datetime.fromisoformat(trip.start_time)
                 start_date, start_time = start_time.date().strftime("%Y-%m-%d"), start_time.time().strftime("%H:%M")
-                return sbb_p2p(user.getLatLon(), park_coords, start_date, start_time)
+                # TODO: remove start_date, start_time
+                return sbb_p2p(user.getLatLon(), park_coords, start_date, start_time), start_date, start_time, trip
 
             dists = remaining_parks.apply(dists_from_coords)
-            dists = dists[dists > 0]
-            return dists
+            dists = dists[dists.apply(lambda d: d[0] > 0)]
+            return dists.apply(lambda d: d[0]), dists.apply(lambda d: d[1]), dists.apply(lambda d: d[2]), dists.apply(lambda d: d[3])
 
 
 # def closest_k_parks(k: int, user: UserInTrip) -> List[Parking]:
@@ -104,23 +110,37 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination:
 
 
 # Union[Tuple[str,str], TripInfo]]
-def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: Union[str, List[float]], for_arrival: bool = False) -> Optional[
-    Tuple[Parking, List[Union[Tuple[str, str], TripInfo]]]]:
+def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: Union[str, List[float]],
+                    for_arrival: bool = False) -> Optional[
+    Tuple[Parking, List[Union[Tuple[str, str], TripInfo]], str, str]]:
+    for u in users:
+        if not (u.location[0] == '[' and u.location[-1] == ']'):
+            try:
+                u.location = str(get_coords_by_name(get_token()['access_token'], u.location))[1:-1]
+            except ValueError:
+                # TODO: handle
+                return None
+
     dists_users_parks = {u: parking_dists_to_coords(u, date, time, destination, for_arrival) for u in users}
-    if any([len(v) == 0 for v in dists_users_parks.values()]):
+    try:
+        if any([len(v if not for_arrival else v[0]) == 0 for v in dists_users_parks.values()]):
+            return None
+    except KeyError:
         return None
 
-    r = 60 * (min([min(v) for v in dists_users_parks.values()]) // 60)
+    r = 60 * (min([min(v if not for_arrival else v[0]) for v in dists_users_parks.values()]) // 60)
     while True:
         distances_to_park = {}
 
         for park_dists in dists_users_parks.values():
+            if for_arrival:
+                park_dists = park_dists[0]
             for park, dist in park_dists[(0 < park_dists) & (park_dists < r)].items():
                 if park not in distances_to_park:
                     distances_to_park[park] = [dist]
                 else:
                     distances_to_park[park].append(dist)
-        if r > max([max(v) for v in dists_users_parks.values()]):
+        if r > max([max(v if not for_arrival else v[0]) for v in dists_users_parks.values()]):
             return None
         if len(distances_to_park.values()) > 0 and max([len(dists) for dists in distances_to_park.values()]) > len(
                 users) / 2:
@@ -131,7 +151,16 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
         distances = distances_to_park[key]
         return len(distances), -sum(distances)
 
-    best_parking = Parking(PARKINGS.loc[max(distances_to_park, key=custom_max)])
+    best_parking_id = max(distances_to_park, key=custom_max)
+    best_parking = Parking(PARKINGS.loc[best_parking_id])
+    b_dates = [d_u_p[1] for u, d_u_p in dists_users_parks.items()]
+    b_times = [d_u_p[2] for u, d_u_p in dists_users_parks.items()]
+    assert all(e == b_dates[0] for e in b_dates)
+    assert all(e == b_times[0] for e in b_times)
+
+    best_park_date = b_dates[0]
+    best_park_time = b_times[0]
+    best_trip = [d_u_p[3] for u, d_u_p in dists_users_parks.items()][0]
 
     leave = []
     for u in users:
@@ -141,12 +170,13 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
             leave_time = t.strftime("%H:%M")
             leave.append((leave_date, leave_time))
         else:
-            t = get_trips(u.getLatLon(), best_parking.coords, date, time, for_arrival=True)[-1]
+            t = get_trips(u.getLatLon(), best_parking.coords, best_park_date, best_park_time, for_arrival=True)[-1]
             leave.append(t)
-    return best_parking, leave
+    return best_parking, leave, best_park_date, best_park_time, best_trip
 
 
-def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) -> Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]]:
+def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) -> Dict[
+    UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]], str]]:
     pt_time = {}
     neighs_dists_per_car = {}
     cargo_per_car = {}
@@ -155,16 +185,16 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
     finished = {}
     for u in users:
         if u.car:
-            candidates = [(neigh, car_p2p(u.getLatLon(), neigh.getLatLon())) for neigh in users if not neigh.car]
-            if len(candidates) == 0:
-                finished[u] = True
-                continue
-
-            neighs_dists_per_car[u] = min(candidates, key=lambda tup: tup[1])
             cargo_per_car[u] = []
             car_past[u] = {}
             already_in_car.append(u)
             finished[u] = False
+
+            candidates = [(neigh, car_p2p(u.getLatLon(), neigh.getLatLon())) for neigh in users if not neigh.car]
+            if len(candidates) == 0:
+                finished[u] = True
+                continue
+            neighs_dists_per_car[u] = min(candidates, key=lambda tup: tup[1])
         else:
             pt_time[u] = sbb_p2p(u.getLatLon(), parking.coords, date, time)
 
@@ -183,12 +213,12 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
                     already_in_car.append(closest_neigh)
                 else:
                     finished[u] = True
-                    break
+                    continue
                 candidates = [(neigh, closest_dist + car_p2p(closest_neigh.getLatLon(), neigh.getLatLon()))
                               for neigh in users if neigh not in already_in_car]
                 if len(candidates) == 0:
                     finished[u] = True
-                    break
+                    continue
                 neighs_dists_per_car[u] = min(candidates, key=lambda tup: tup[1])
 
     timings_per_driver = {}
@@ -199,10 +229,10 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
             last_pass, last_track = passengers[-1]
             start = plus_times(date, time, -car_past[driver][last_pass] - last_track)
         passenger_timings = []
-        for p in zip(passengers):
-            time = start + timedelta(seconds=car_past[driver][p[0]])
+        for p, _ in passengers:
+            time = start + timedelta(seconds=car_past[driver][p])
             passenger_timings.append((p, time.strftime("%Y-%m-%d %H:%M")))
-        timings_per_driver[driver] = (start.strftime("%Y-%m-%d %H:%M"), passenger_timings)
+        timings_per_driver[driver] = (start.strftime("%Y-%m-%d %H:%M"), passenger_timings)  # , f"{date} {time}")
 
     return timings_per_driver
 
