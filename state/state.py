@@ -80,6 +80,17 @@ def join_journey(user_id: str, journey_id: str, start_location, car=False, car_c
                     (user_id, journey_id, start_location, car, car_capacity))
 
 
+def update_user_car(user_id: str, journey_id: str, car: bool):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE user_journeys SET car = ? WHERE journey_id = ? AND user_id = ?", (car, journey_id, user_id))
+
+
+def update_user_car_capacity(user_id: str, journey_id: str, car_capacity: int):
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("UPDATE user_journeys SET car_capacity = ? WHERE journey_id = ? AND user_id = ?",
+                    (car_capacity, journey_id, user_id))
+
+
 def store_journey_plan(journey_id: str, plan: str):
     with sqlite3.connect('state.sqlite') as con:
         con.execute("UPDATE journeys SET plan = ? WHERE journey_id = ?", (plan, journey_id))
