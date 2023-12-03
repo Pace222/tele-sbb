@@ -78,12 +78,20 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination:
             MAX_PARKINGS).index]
 
     if user.car:
-        dists = remaining_parks.apply(lambda park_coords: car_p2p(user.getLatLon(), park_coords))
-        dists = dists[dists > 0]
         if not for_arrival:
+            dists = remaining_parks.apply(lambda park_coords: car_p2p(user.getLatLon(), park_coords))
+            dists = dists[dists > 0]
             return dists
         else:
-            return dists, [], [], []
+            def dists_from_coords(park_coords):
+                trip = get_trips(park_coords, destination, date, time, for_arrival=True)[-1]
+                start_time = datetime.fromisoformat(trip.start_time)
+                start_date, start_time = start_time.date().strftime("%Y-%m-%d"), start_time.time().strftime("%H:%M")
+                return car_p2p(user.getLatLon(), park_coords), start_date, start_time, trip
+            dists = remaining_parks.apply(dists_from_coords)
+
+            dists = dists[dists.apply(lambda d: d[0] > 0)]
+            return dists.apply(lambda d: d[0]), dists.apply(lambda d: d[1]), dists.apply(lambda d: d[2]), dists.apply(lambda d: d[3])
     else:
         if not for_arrival:
             dists = remaining_parks.apply(lambda park_coords: sbb_p2p(user.getLatLon(), park_coords, date, time))
@@ -156,9 +164,9 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
 
     best_parking_id = max(distances_to_park, key=custom_max)
     best_parking = Parking(PARKINGS.loc[best_parking_id])
-    best_park_date = [d_u_p[1] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
-    best_park_time = [d_u_p[2] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
-    best_trip = [d_u_p[3] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
+    best_park_date = [d_u_p[1] for u, d_u_p in dists_users_parks.items()][0].loc[best_parking_id]
+    best_park_time = [d_u_p[2] for u, d_u_p in dists_users_parks.items()][0].loc[best_parking_id]
+    best_trip = [d_u_p[3] for u, d_u_p in dists_users_parks.items()][0].loc[best_parking_id]
 
     leave = []
     for u in users:
@@ -203,7 +211,7 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
             if u.car and not finished[u] and len(cargo_per_car[u]) < u.car_capacity - 1:
                 closest_neigh, closest_dist = neighs_dists_per_car[u]
                 alternative = car_p2p(closest_neigh.getLatLon(), parking.coords)
-                if alternative < pt_time[closest_neigh] and all(
+                if closest_neigh not in already_in_car and alternative < pt_time[closest_neigh] and all(
                         closest_dist - car_past[u][passenger] + alternative < pt_time[passenger] for passenger, _ in
                         cargo_per_car[u]):
                     cargo_per_car[u].append((closest_neigh, alternative))
