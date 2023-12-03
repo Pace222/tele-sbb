@@ -134,7 +134,7 @@ def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None)
             leave_time = t.strftime("%H:%M")
             leave.append((leave_date, leave_time))
         else:
-            t = get_trips(u.getLatLon(), best_parking.coords, date, time, for_arrival=True)[0]
+            t = get_trips(u.getLatLon(), best_parking.coords, date, time, for_arrival=True)[-1]
             leave.append(t)
     return best_parking, leave
 
