@@ -139,7 +139,7 @@ def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None)
     return best_parking, leave
 
 
-def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) -> dict[UserInTrip, List[UserInTrip]]:
+def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) -> Dict[UserInTrip, List[UserInTrip]]:
     pt_time = {}
     neighs_dists_per_car = {}
     cargo_per_car = {}
