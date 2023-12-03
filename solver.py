@@ -69,7 +69,7 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     print("Drivers:")
     print(drivers)
     # Driver
-    for driver, (start_time, passengers_n_time) in drivers:
+    for driver, (start_time, passengers_n_time) in drivers.items():
         #  (check how many passengers)
         if len(passengers_n_time) == 0:
             instructions.append(f"[{driver.user_id}] Drive - from {driver.location} to {dest_name} P+R\n")
