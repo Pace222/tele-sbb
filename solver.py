@@ -21,7 +21,7 @@ def solve_planning(journey_id: str) -> \
     # TODO solve "year problem"
     date = f"2024-{month}-{day}"
 
-    solution_v1 = optimal_parking(users, date, time, destination)
+    solution_v1 = optimal_parking(users, date, time, destination, True)
 
     if solution_v1 is None:
         return None
@@ -29,7 +29,8 @@ def solve_planning(journey_id: str) -> \
         parking = solution_v1[0]
 
         # dict[driver, tuple[start_time, list[tuple[passenger, pick_up_time]]]]
-        drivers_sol: Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]] = share_cars(users, parking, date, time)
+        drivers_sol: Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]] = share_cars(users, parking,
+                                                                                             solution_v1[2], solution_v1[3])
 
         user_plan_v2 = []
 
@@ -51,12 +52,12 @@ def solve_planning(journey_id: str) -> \
                 user_plan_v2.append((car_passenger, (car_driver, pick_up_time)))
 
         # Get train trip as a team
-        final_train_options = get_trips(parking.coords, destination, date, time)
+        final_train_options = solution_v1[4]#get_trips(parking.coords, destination, date, time, True)
 
         if len(final_train_options) == 0:
             return None
 
-        final_train = final_train_options[0]
+        final_train = final_train_options
 
         return journey, parking, drivers_sol, user_plan_v2, final_train
 
