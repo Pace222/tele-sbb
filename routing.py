@@ -183,12 +183,12 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
                     already_in_car.append(closest_neigh)
                 else:
                     finished[u] = True
-                    break
+                    continue
                 candidates = [(neigh, closest_dist + car_p2p(closest_neigh.getLatLon(), neigh.getLatLon()))
                               for neigh in users if neigh not in already_in_car]
                 if len(candidates) == 0:
                     finished[u] = True
-                    break
+                    continue
                 neighs_dists_per_car[u] = min(candidates, key=lambda tup: tup[1])
 
     timings_per_driver = {}
