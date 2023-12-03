@@ -114,11 +114,12 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
                     for_arrival: bool = False) -> Optional[
     Tuple[Parking, List[Union[Tuple[str, str], TripInfo]], str, str]]:
     for u in users:
-        if not (u.location[0] == '[' and u.location[-1] == ']'):
+        try:
+            u.getLatLon()
+        except ValueError:
             try:
                 u.location = str(get_coords_by_name(get_token()['access_token'], u.location))[1:-1]
             except ValueError:
-                # TODO: handle
                 return None
 
     dists_users_parks = {u: parking_dists_to_coords(u, date, time, destination, for_arrival) for u in users}
