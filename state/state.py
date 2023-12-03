@@ -149,3 +149,10 @@ def print_all_db():
         print("--- User Journeys:")
         res = con.execute("Select * from user_journeys").fetchall()
         print(res)
+
+
+def flush_db():
+    with sqlite3.connect('state.sqlite') as con:
+        con.execute("DELETE FROM users")
+        con.execute("DELETE FROM journeys")
+        con.execute("DELETE FROM user_journeys")
