@@ -343,8 +343,8 @@ async def no_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         a = solve_planning(str(update.callback_query.message.chat_id))
         if a is not None:
             plan, train_card = prepare_planning_v1(*a)
-            await update.message.reply_text(str(plan))
-            await update.message.reply_photo(train_card)
+            await update.callback_query.message.reply_text(str(plan))
+            await update.callback_query.message.reply_photo(train_card)
     store.flush_db()
     return ConversationHandler.END
 
