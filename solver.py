@@ -76,8 +76,8 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
         if len(passengers_n_time) == 0:
             instructions.append(f"[{id_to_nametag(driver.user_id)}] Drive - from {driver.location} to {dest_name} P+R\n")
         else:
-            passengers_text = ' - ' + ' - \n'.join([f"{id_to_nametag(p.user_id)} @ "
-                                                    f"{cleanerTime(t)}" for p, t in passengers_n_time])
+            passengers_text = ' - ' + ' - \n'.join([f"{id_to_nametag(pt[0].user_id)} @ "
+                                                    f"{cleanerTime(pt[1])}" for pt in passengers_n_time])
             instructions.append(f"[{id_to_nametag(driver.user_id)}] Car sharing (driver) - From: {driver.location} @ "
                                 f"{cleanerTime(start_time)}, "
                                 f" To: {dest_name}"  # @ {trip.stop_time}"  # TODO add arrival time also??
