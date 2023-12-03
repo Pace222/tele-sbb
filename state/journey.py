@@ -5,9 +5,9 @@ class Journey:
         self.journey_id = journey_id
         self.title = title
         self.destination = destination
-        self.deadline = deadline_month
-        self.deadline = deadline_day
-        self.deadline = deadline_time
+        self.deadline_month = deadline_month
+        self.deadline_day = deadline_day
+        self.deadline_time = deadline_time
         if users is None:
             users = {}
         self.users = users
