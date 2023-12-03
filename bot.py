@@ -29,7 +29,6 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler
 from keys import TELEGRAM_KEY
 from solver import *
-from telegram import sendP
 
 import state.state as store
 
@@ -44,18 +43,18 @@ logger = logging.getLogger(__name__)
 
 store.init_db()
 conv = {
-    "January": "01",
-    "February": "02",
-    "March": "03",
-    "April": "04",
+    "Jan": "01",
+    "Feb": "02",
+    "Mar": "03",
+    "Apr": "04",
     "May": "05",
-    "June": "06",
-    "July": "07",
-    "August": "08",
-    "September": "09",
-    "October": "10",
-    "November": "11",
-    "December": "12"
+    "Jun": "06",
+    "Jul": "07",
+    "Aug": "08",
+    "Sep": "09",
+    "Oct": "10",
+    "Nov": "11",
+    "Dec": "12"
 }
 # Stages
 CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, WAIT_FOR_OTHERS, WAIT_LOC, DEST, TIME = range(9)
@@ -106,17 +105,17 @@ async def select_day(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     print("eeeee")
     keyboard = [ 
         [
-        InlineKeyboardButton("1", callback_data='give_location'+"1"),
-        InlineKeyboardButton("2", callback_data='give_location'+"2"),
-        InlineKeyboardButton("3", callback_data='give_location'+"3"),
-        InlineKeyboardButton("4", callback_data='give_location'+"4"),
-        InlineKeyboardButton("5", callback_data='give_location'+"5"),
+        InlineKeyboardButton("1", callback_data='give_location'+"01"),
+        InlineKeyboardButton("2", callback_data='give_location'+"02"),
+        InlineKeyboardButton("3", callback_data='give_location'+"03"),
+        InlineKeyboardButton("4", callback_data='give_location'+"04"),
+        InlineKeyboardButton("5", callback_data='give_location'+"05"),
         ],
         [
-        InlineKeyboardButton("6", callback_data='give_location'+"6"),
-        InlineKeyboardButton("7", callback_data='give_location'+"7"),
-        InlineKeyboardButton("8", callback_data='give_location'+"8"),
-        InlineKeyboardButton("9", callback_data='give_location'+"9"),
+        InlineKeyboardButton("6", callback_data='give_location'+"06"),
+        InlineKeyboardButton("7", callback_data='give_location'+"07"),
+        InlineKeyboardButton("8", callback_data='give_location'+"08"),
+        InlineKeyboardButton("9", callback_data='give_location'+"09"),
         InlineKeyboardButton("10", callback_data='give_location'+"10"),
         ],
         [
@@ -150,7 +149,7 @@ async def select_day(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     planid = str(query.message.chat_id)
-    store.set_journey_deadline_month(planid, query.data.split('select_day')[1])
+    store.set_journey_deadline_month(planid, conv[query.data.split('select_day')[1]])
     store.print_all_db()
     await query.edit_message_text(text='Please select a date:', reply_markup=reply_markup)
     return CHOOSE_INPUT_METH
@@ -203,11 +202,11 @@ async def int_take_geo_pos(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # user = update.message.from_user
-    # user_location = update.message.location
+    user_location = update.message.location
     # location_strings[user.id] = user_location
     # print(user_location)
     # print(location_strings)
-    store.join_journey(update.message.from_user.id, str(update.message.chat_id), str(update.message.location), car=False, car_capacity=1)
+    store.join_journey(update.message.from_user.id, str(update.message.chat_id), f"{user_location.latitude},{user_location.longitude}", car=False, car_capacity=1)
     store.print_all_db()
     await update.message.reply_text("Send me dest:")
     return DEST
@@ -257,7 +256,7 @@ async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
     store.print_all_db()
     cnt = store.count_journey_users(str(update.message.chat_id))
-    if (cnt >= 3):
+    if (cnt >= 2):
         a = solve_planning(str(update.message.chat_id))
         if a is not None:
             plan, train_card = prepare_planning_v1(a)
@@ -267,19 +266,19 @@ async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # user = update.message.from_user
-    # user_location = update.message.location
+    user_location = update.message.location
     # location_strings[user.id] = user_location
     # print(user_location)
     # print(location_strings)
-    store.join_journey(update.message.from_user.id, str(update.message.chat_id), str(update.message.location), car=False, car_capacity=1)
+    store.join_journey(update.message.from_user.id, str(update.message.chat_id), f"{user_location.latitude},{user_location.longitude}", car=False, car_capacity=1)
     store.print_all_db()
     cnt = store.count_journey_users(str(update.message.chat_id))
-    if (cnt >= 3):
+    if (cnt >= 2):
         a = solve_planning(str(update.message.chat_id))
         if a is not None:
             plan, train_card = prepare_planning_v1(a)
-        await update.message.reply_text(str(plan))
-        await update.message.reply_photo(train_card)
+            await update.message.reply_text(str(plan))
+            await update.message.reply_photo(train_card)
     return ConversationHandler.END
 
 async def int_take_geo_pos_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -313,7 +312,7 @@ def main() -> None:
                 CallbackQueryHandler(select_day, pattern=r'^select_day([A-Za-z]{3})$'),
             ],
             CHOOSE_INPUT_METH: [
-                CallbackQueryHandler(choose_starting_point, pattern=r'^give_location(30|[1-9]|[12]\d)$')
+                CallbackQueryHandler(choose_starting_point, pattern=r'^give_location(0[1-9]|1\d|2\d|30)$')
             ],
             GIVE_LOC: [
                 CallbackQueryHandler(int_take_string, pattern="^"+str("int_take_string")+"$"),

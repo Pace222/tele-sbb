@@ -14,7 +14,7 @@ MAX_DISTANCE = 10_000  # in m
 
 class TripInfo:
 
-    def __init__(self, legs):
+    def __init__(self, legs, duration):
         stops = [l['serviceJourney']['stopPoints'] for l in legs if l['type'] == 'PTRideLeg']
         self.stops = [[s['place']['name'] for s in (stop[0], stop[-1])] for stop in stops]
         self.start = self.stops[0][0]
@@ -33,8 +33,8 @@ class Parking:
         self.price_day = parking["parkrail_preis_tag"]
 
 
-def get_trip(origin: Union[str, List[float]], destination: Union[str, List[float]], date: str = None, time: str = None,
-             for_arrival: bool = False) -> TripInfo:
+def get_trips(origin: Union[str, List[float]], destination: Union[str, List[float]], date: str = None, time: str = None,
+              for_arrival: bool = False) -> List[TripInfo]:
     auth = get_token()['access_token']
     headers = {
         'Authorization': f"Bearer {auth}",
@@ -57,8 +57,9 @@ def get_trip(origin: Union[str, List[float]], destination: Union[str, List[float
     if time is not None:
         content["time"] = time
 
-    trips = requests.post(f"{API_URL}/v3/trips/by-origin-destination", headers=headers, json=content).json()["trips"]
 
+    trips = requests.post(f"{API_URL}/v3/trips/by-origin-destination", headers=headers, json=content).json()
+    print(trips)
     return [TripInfo(t['legs'], t['duration']) for t in trips if 'duration' in t]
 
 
