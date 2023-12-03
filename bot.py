@@ -57,7 +57,7 @@ conv = {
     "Dec": "12"
 }
 # Stages
-CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, WAIT_FOR_OTHERS, WAIT_LOC, DEST, TIME = range(9)
+CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, WAIT_FOR_OTHERS, WAIT_LOC, DEST, TIME, CAR_MAYBE, CAR_WIEVIEL = range(11)
 location_strings = {}
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -224,11 +224,12 @@ async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_time = update.message.text
     store.set_journey_deadline_time(str(update.message.chat_id), user_time)
     store.print_all_db()
-    return ConversationHandler.END
+    return CAR_MAYBE
 
-async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.edit_message_text(text="next time")
+async def have_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user
+    user_time = update.message.text
+    store.print_all_db()
     return ConversationHandler.END
 
 WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END, COMPUTE = range(6)
