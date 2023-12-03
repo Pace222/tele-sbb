@@ -327,6 +327,7 @@ async def handle_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             plan, train_card = prepare_planning_v1(*a)
             await update.message.reply_text(str(plan))
             await update.message.reply_photo(train_card)
+    store.flush_db()
     return ConversationHandler.END
 
 async def no_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -340,6 +341,7 @@ async def no_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             plan, train_card = prepare_planning_v1(*a)
             await update.message.reply_text(str(plan))
             await update.message.reply_photo(train_card)
+    store.flush_db()
     return ConversationHandler.END
 
 # async def spec_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
