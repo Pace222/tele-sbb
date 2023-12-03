@@ -71,7 +71,7 @@ def sbb_p2p(origin: List[float], destination: List[float], date: str, time: str)
 
 
 def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination: Union[str, List[float]], for_arrival: bool = False):
-    remaining_parks = PARKINGS['coords'].apply(lambda park_coords: direct_p2p_meters(user.getLatLon(), park_coords)).nsmallest(MAX_PARKINGS)
+    remaining_parks = PARKINGS['coords'].loc[PARKINGS['coords'].apply(lambda park_coords: direct_p2p_meters(user.getLatLon(), park_coords)).nsmallest(MAX_PARKINGS).index]
 
     if user.car:
         dists = remaining_parks.apply(lambda park_coords: car_p2p(user.getLatLon(), park_coords))
