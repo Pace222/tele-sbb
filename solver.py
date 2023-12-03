@@ -69,7 +69,7 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     instructions = [f"=== Trip to: {final_train.end} ===\n\nPassengers will first meet-up at {parking.name}:\n"]
 
     # Driver
-    for driver, (start_time, passengers_n_time) in drivers.items():
+    for driver, (start_time, passengers_n_time, arrival_midtime) in drivers.items():
         #  (check how many passengers)
         if len(passengers_n_time) == 0:
             instructions.append(f"[{id_to_nametag(driver.user_id)}] Drive - From {driver.location} To {dest_name} P+R\n")
@@ -78,13 +78,13 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
                                                     f"{cleanerTimeMin(pt[1])}" for pt in passengers_n_time])
             instructions.append(f"[{id_to_nametag(driver.user_id)}] Car sharing (driver) - From: {driver.location} @ "
                                 f"{cleanerTimeMin(start_time)}, "
-                                f" To: {dest_name}\n"  # @ {trip.stop_time}"  # TODO add arrival time also??
+                                f" To: {dest_name} @ {cleanerTimeMin(arrival_midtime)}\n"  # TODO add arrival time also??
                                 f"Pick-up passengers:\n{passengers_text}\n")
 
     # Passengers or TP
 
     for user, trip in user_plan:
-        user_name = id_to_nametag(user.user_id)  # TODO update user registration with name...
+        user_name = id_to_nametag(user.user_id)
         if isinstance(trip, TripInfo):
             # Public transportation user
             via_string = ""

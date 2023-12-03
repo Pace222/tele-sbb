@@ -162,16 +162,15 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
     best_trip = [d_u_p[3] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
 
     leave = []
-    if not for_arrival:
-        for u in users:
-            if u.car:
-                t = plus_times(date, time, -car_p2p(u.getLatLon(), best_parking.coords))
-                leave_date = t.strftime("%Y-%m-%d")
-                leave_time = t.strftime("%H:%M")
-                leave.append((leave_date, leave_time))
-            else:
-                t = get_trips(u.getLatLon(), best_parking.coords, best_park_date, best_park_time, for_arrival=True)[-1]
-                leave.append(t)
+    for u in users:
+        if u.car:
+            t = plus_times(date, time, -car_p2p(u.getLatLon(), best_parking.coords))
+            leave_date = t.strftime("%Y-%m-%d")
+            leave_time = t.strftime("%H:%M")
+            leave.append((leave_date, leave_time))
+        else:
+            t = get_trips(u.getLatLon(), best_parking.coords, best_park_date, best_park_time, for_arrival=True)[-1]
+            leave.append(t)
     return best_parking, leave, best_park_date, best_park_time, best_trip
 
 
@@ -230,9 +229,9 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
             start = plus_times(date, time, -car_past[driver][last_pass] - last_track)
         passenger_timings = []
         for p, _ in passengers:
-            time = start + timedelta(seconds=car_past[driver][p])
-            passenger_timings.append((p, time.strftime("%Y-%m-%d %H:%M")))
-        timings_per_driver[driver] = (start.strftime("%Y-%m-%d %H:%M"), passenger_timings)  # , f"{date} {time}")
+            t = start + timedelta(seconds=car_past[driver][p])
+            passenger_timings.append((p, t.strftime("%Y-%m-%d %H:%M")))
+        timings_per_driver[driver] = (start.strftime("%Y-%m-%d %H:%M"), passenger_timings, f"{date} {time}")
 
     return timings_per_driver
 
