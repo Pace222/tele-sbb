@@ -1,13 +1,14 @@
 import base64
+from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 
-TRAIN_CARD_TEMPLATE: str = '../train_card.png'
+TRAIN_CARD_TEMPLATE: str = Path(__file__).parent.parent / 'train_card.png'
 
 
 def get_card_name(departure_location: str, arrival_location: str, departure_time: str, arrival_time: str):
-    return f"{departure_location}_{arrival_location}_{departure_time}_{arrival_time}.png"
+    return (base64.b64encode(f"{departure_location}_{arrival_location}_{departure_time}_{arrival_time}".encode("utf-8")) + b".png").decode("utf-8")
 
 
 def generate_train_card(departure_location: str, arrival_location: str, departure_time: str, arrival_time: str):
@@ -16,8 +17,8 @@ def generate_train_card(departure_location: str, arrival_location: str, departur
     image = Image.open(TRAIN_CARD_TEMPLATE)
     draw = ImageDraw.Draw(image)
     # set font
-    font = ImageFont.truetype('../RobotoMono-Regular.ttf', size=20)
-    font_bold = ImageFont.truetype('../RobotoMono-Bold.ttf', size=20)
+    font = ImageFont.truetype(str(Path(__file__).parent.parent / 'RobotoMono-Regular.ttf'), size=20)
+    font_bold = ImageFont.truetype(str(Path(__file__).parent.parent / 'RobotoMono-Bold.ttf'), size=20)
 
     # wrap text
     departure_location_w = textwrap.fill(departure_location, width=12)

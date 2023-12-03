@@ -1,2 +1,0 @@
-TELEGRAM_KEY = ""
-GOOGLE_MAPS_KEY = ""

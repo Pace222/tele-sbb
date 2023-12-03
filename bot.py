@@ -259,9 +259,9 @@ async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if (cnt >= 2):
         a = solve_planning(str(update.message.chat_id))
         if a is not None:
-            plan, train_card = prepare_planning_v1(a)
-        await update.message.reply_text(str(plan))
-        await update.message.reply_photo(train_card)
+            plan, train_card = prepare_planning_v1(*a)
+            await update.message.reply_text(str(plan))
+            await update.message.reply_photo(train_card)
     return ConversationHandler.END
 
 async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -276,7 +276,7 @@ async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     if (cnt >= 2):
         a = solve_planning(str(update.message.chat_id))
         if a is not None:
-            plan, train_card = prepare_planning_v1(a)
+            plan, train_card = prepare_planning_v1(*a)
             await update.message.reply_text(str(plan))
             await update.message.reply_photo(train_card)
     return ConversationHandler.END

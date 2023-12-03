@@ -47,7 +47,7 @@ def get_id_by_name(auth: str, place: str):
     if len(place_ids) == 0:
         raise ValueError("Invalid origin")
     else:
-        return place_ids[0]['id']
+        return place_ids[0]['centroid']['coordinates'][::-1]
 
 def direct_p2p_meters(coords1: List[float], coords2: List[float]):
     R = 6371  # Earth radius in kilometers

@@ -46,19 +46,20 @@ def prepare_planning_v1(journey, parking, user_plan, final_train):
         user_name = user.user_id  # TODO update user registration with name...
         if user.car == 0:
             via_string = ""
-            if trip.stops > 2:
-                via_string = ', via' + trip.stops[1:-1]
+            if len(trip.stops) > 2:
+                via_string = ', via: ' + ','.join([s[0] for s in trip.stops[1:-1]])
             instructions.append(f"[{user_name}] Public transport - From:{trip.start} @ {trip.start_time} to {trip.end} "
-                                f"@ {trip.end_time}{via_string}")
+                                f"@ {trip.stop_time}{via_string}")
         else:
             instructions.append(f"[{user_name}] Drive - from {user.location} to {dest_name} P+R")
 
     instructions.append(f"[Final] Public transport - From:{final_train.start} @ {final_train.start_time} to " +
-                        f"{final_train.end} @ {final_train.end_time}")
+                        f"{final_train.end} @ {final_train.stop_time}")
 
     train_card_location = generate_train_card(final_train.start, final_train.end, final_train.start_time,
-                                              final_train.end_time)
+                                              final_train.stop_time)
 
+    print(train_card_location)
     instructions.append("\n You will all be there on time to take the train together!")
     plan = "\n".join(instructions)
     store.set_journey_plan(journey.journey_id, plan)
