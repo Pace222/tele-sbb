@@ -54,8 +54,8 @@ def solve_planning(journey_id: str) -> \
         # Get train trip as a team
         final_train_options = solution_v1[4]#get_trips(parking.coords, destination, date, time, True)
 
-        if len(final_train_options) == 0:
-            return None
+        #if len(final_train_options) == 0:
+        #    return None
 
         final_train = final_train_options
 

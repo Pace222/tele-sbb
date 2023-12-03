@@ -80,7 +80,10 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination:
     if user.car:
         dists = remaining_parks.apply(lambda park_coords: car_p2p(user.getLatLon(), park_coords))
         dists = dists[dists > 0]
-        return dists
+        if not for_arrival:
+            return dists
+        else:
+            return dists, [], [], []
     else:
         if not for_arrival:
             dists = remaining_parks.apply(lambda park_coords: sbb_p2p(user.getLatLon(), park_coords, date, time))
@@ -154,25 +157,21 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
 
     best_parking_id = max(distances_to_park, key=custom_max)
     best_parking = Parking(PARKINGS.loc[best_parking_id])
-    b_dates = [d_u_p[1] for u, d_u_p in dists_users_parks.items()]
-    b_times = [d_u_p[2] for u, d_u_p in dists_users_parks.items()]
-    assert all(e == b_dates[0] for e in b_dates)
-    assert all(e == b_times[0] for e in b_times)
-
-    best_park_date = b_dates[0]
-    best_park_time = b_times[0]
-    best_trip = [d_u_p[3] for u, d_u_p in dists_users_parks.items()][0]
+    best_park_date = [d_u_p[1] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
+    best_park_time = [d_u_p[2] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
+    best_trip = [d_u_p[3] for u, d_u_p in dists_users_parks.items() if not u.car][0].loc[best_parking_id]
 
     leave = []
-    for u in users:
-        if u.car:
-            t = plus_times(date, time, -car_p2p(u.getLatLon(), best_parking.coords))
-            leave_date = t.strftime("%Y-%m-%d")
-            leave_time = t.strftime("%H:%M")
-            leave.append((leave_date, leave_time))
-        else:
-            t = get_trips(u.getLatLon(), best_parking.coords, best_park_date, best_park_time, for_arrival=True)[-1]
-            leave.append(t)
+    if not for_arrival:
+        for u in users:
+            if u.car:
+                t = plus_times(date, time, -car_p2p(u.getLatLon(), best_parking.coords))
+                leave_date = t.strftime("%Y-%m-%d")
+                leave_time = t.strftime("%H:%M")
+                leave.append((leave_date, leave_time))
+            else:
+                t = get_trips(u.getLatLon(), best_parking.coords, best_park_date, best_park_time, for_arrival=True)[-1]
+                leave.append(t)
     return best_parking, leave, best_park_date, best_park_time, best_trip
 
 
