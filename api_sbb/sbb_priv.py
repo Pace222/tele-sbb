@@ -1,9 +1,11 @@
+from datetime import datetime
 from math import radians, sin, cos, atan2, sqrt
 
 import os
 from typing import List
 
 import pandas as pd
+import pytz
 
 import requests
 
@@ -55,3 +57,9 @@ def direct_p2p_meters(coords1: List[float], coords2: List[float]):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     distance = R * c
     return distance * 1000
+
+def minus_times(final_date: str, final_time: str, start_date_time: str):
+    datetime_str = f"{final_date} {final_time}"
+    final_combined = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").astimezone(pytz.timezone('Europe/Zurich'))
+    start_combined = datetime.fromisoformat(start_date_time)
+    return final_combined - start_combined
