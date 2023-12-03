@@ -41,7 +41,20 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 store.init_db()
-
+conv = {
+    "January": "01",
+    "February": "02",
+    "March": "03",
+    "April": "04",
+    "May": "05",
+    "June": "06",
+    "July": "07",
+    "August": "08",
+    "September": "09",
+    "October": "10",
+    "November": "11",
+    "December": "12"
+}
 # Stages
 CHOOSE_MONTH, CHOOSE_DAY, CHOOSE_INPUT_METH, GIVE_LOC, WAIT_STRING, WAIT_FOR_OTHERS, WAIT_LOC, DEST, TIME = range(9)
 location_strings = {}
@@ -56,7 +69,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup=ForceReply(selective=True),
     )
 
-async def join(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+# async def join(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 
@@ -66,21 +79,20 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def select_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    print("eeeee")
     keyboard = [ [
-        InlineKeyboardButton("Jan", callback_data='select_day'),
-        InlineKeyboardButton("Feb", callback_data='select_day'),
-        InlineKeyboardButton("Mar", callback_data='select_day'),
-        InlineKeyboardButton("Apr", callback_data='select_day'),
-        InlineKeyboardButton("May", callback_data='select_day'),
-        InlineKeyboardButton("Jun", callback_data='select_day')],
+        InlineKeyboardButton("Jan", callback_data='select_day'+"Jan"),
+        InlineKeyboardButton("Feb", callback_data='select_day'+"Feb"),
+        InlineKeyboardButton("Mar", callback_data='select_day'+"Mar"),
+        InlineKeyboardButton("Apr", callback_data='select_day'+"Apr"),
+        InlineKeyboardButton("May", callback_data='select_day'+"May"),
+        InlineKeyboardButton("Jun", callback_data='select_day'+"Jun")],
         [
-        InlineKeyboardButton("Jul", callback_data='select_day'),
-        InlineKeyboardButton("Aug", callback_data='select_day'),
-        InlineKeyboardButton("Sep", callback_data='select_day'),
-        InlineKeyboardButton("Oct", callback_data='select_day'),
-        InlineKeyboardButton("Nov", callback_data='select_day'),
-        InlineKeyboardButton("Dec", callback_data='select_day'),
+        InlineKeyboardButton("Jul", callback_data='select_day'+"Jul"),
+        InlineKeyboardButton("Aug", callback_data='select_day'+"Aug"),
+        InlineKeyboardButton("Sep", callback_data='select_day'+"Sep"),
+        InlineKeyboardButton("Oct", callback_data='select_day'+"Oct"),
+        InlineKeyboardButton("Nov", callback_data='select_day'+"Nov"),
+        InlineKeyboardButton("Dec", callback_data='select_day'+"Dec"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -92,49 +104,52 @@ async def select_day(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     print("eeeee")
     keyboard = [ 
         [
-        InlineKeyboardButton("1", callback_data='give_location'),
-        InlineKeyboardButton("2", callback_data='give_location'),
-        InlineKeyboardButton("3", callback_data='give_location'),
-        InlineKeyboardButton("4", callback_data='give_location'),
-        InlineKeyboardButton("5", callback_data='give_location'),
+        InlineKeyboardButton("1", callback_data='give_location'+"1"),
+        InlineKeyboardButton("2", callback_data='give_location'+"2"),
+        InlineKeyboardButton("3", callback_data='give_location'+"3"),
+        InlineKeyboardButton("4", callback_data='give_location'+"4"),
+        InlineKeyboardButton("5", callback_data='give_location'+"5"),
         ],
         [
-        InlineKeyboardButton("6", callback_data='give_location'),
-        InlineKeyboardButton("7", callback_data='give_location'),
-        InlineKeyboardButton("8", callback_data='give_location'),
-        InlineKeyboardButton("9", callback_data='give_location'),
-        InlineKeyboardButton("10", callback_data='give_location'),
+        InlineKeyboardButton("6", callback_data='give_location'+"6"),
+        InlineKeyboardButton("7", callback_data='give_location'+"7"),
+        InlineKeyboardButton("8", callback_data='give_location'+"8"),
+        InlineKeyboardButton("9", callback_data='give_location'+"9"),
+        InlineKeyboardButton("10", callback_data='give_location'+"10"),
         ],
         [
-        InlineKeyboardButton("11", callback_data='give_location'),
-        InlineKeyboardButton("12", callback_data='give_location'),
-        InlineKeyboardButton("13", callback_data='give_location'),
-        InlineKeyboardButton("14", callback_data='give_location'),
-        InlineKeyboardButton("15", callback_data='give_location'),
+        InlineKeyboardButton("11", callback_data='give_location'+"11"),
+        InlineKeyboardButton("12", callback_data='give_location'+"12"),
+        InlineKeyboardButton("13", callback_data='give_location'+"13"),
+        InlineKeyboardButton("14", callback_data='give_location'+"14"),
+        InlineKeyboardButton("15", callback_data='give_location'+"15"),
         ],
         [
-        InlineKeyboardButton("16", callback_data='give_location'),
-        InlineKeyboardButton("17", callback_data='give_location'),
-        InlineKeyboardButton("18", callback_data='give_location'),
-        InlineKeyboardButton("19", callback_data='give_location'),
-        InlineKeyboardButton("20", callback_data='give_location'),
+        InlineKeyboardButton("16", callback_data='give_location'+"16"),
+        InlineKeyboardButton("17", callback_data='give_location'+"17"),
+        InlineKeyboardButton("18", callback_data='give_location'+"18"),
+        InlineKeyboardButton("19", callback_data='give_location'+"19"),
+        InlineKeyboardButton("20", callback_data='give_location'+"20"),
         ],
         [
-        InlineKeyboardButton("21", callback_data='give_location'),
-        InlineKeyboardButton("22", callback_data='give_location'),
-        InlineKeyboardButton("23", callback_data='give_location'),
-        InlineKeyboardButton("24", callback_data='give_location'),
-        InlineKeyboardButton("25", callback_data='give_location'),
+        InlineKeyboardButton("21", callback_data='give_location'+"21"),
+        InlineKeyboardButton("22", callback_data='give_location'+"22"),
+        InlineKeyboardButton("23", callback_data='give_location'+"23"),
+        InlineKeyboardButton("24", callback_data='give_location'+"24"),
+        InlineKeyboardButton("25", callback_data='give_location'+"25"),
         ],
         [
-        InlineKeyboardButton("26", callback_data='give_location'),
-        InlineKeyboardButton("27", callback_data='give_location'),
-        InlineKeyboardButton("28", callback_data='give_location'),
-        InlineKeyboardButton("29", callback_data='give_location'),
-        InlineKeyboardButton("30", callback_data='give_location'),
+        InlineKeyboardButton("26", callback_data='give_location'+"26"),
+        InlineKeyboardButton("27", callback_data='give_location'+"27"),
+        InlineKeyboardButton("28", callback_data='give_location'+"28"),
+        InlineKeyboardButton("29", callback_data='give_location'+"29"),
+        InlineKeyboardButton("30", callback_data='give_location'+"30"),
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
+    planid = str(query.message.chat_id)
+    store.set_journey_deadline_month(planid, query.data.split('select_day')[1])
+    store.print_all_db()
     await query.edit_message_text(text='Please select a date:', reply_markup=reply_markup)
     return CHOOSE_INPUT_METH
 
@@ -161,6 +176,9 @@ async def choose_starting_point(update: Update, context: ContextTypes.DEFAULT_TY
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     print("eyyyy")
+    planid = str(query.message.chat_id)
+    store.set_journey_deadline_day(planid, query.data.split('give_location')[1])
+    store.print_all_db()
     await query.edit_message_text('Where are you going from ?', reply_markup=reply_markup)
     return GIVE_LOC
 
@@ -172,8 +190,8 @@ async def int_take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     location_strings[update.message.from_user.id] = update.message.text
-    
-    print(location_strings)
+    store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
+    store.print_all_db()
     await update.message.reply_text("Send me dest:")
     return DEST
 
@@ -182,41 +200,80 @@ async def int_take_geo_pos(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     return WAIT_LOC
 
 async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    user = update.message.from_user
-    user_location = update.message.location
-    location_strings[user.id] = user_location
-    print(user_location)
-    print(location_strings)
+    # user = update.message.from_user
+    # user_location = update.message.location
+    # location_strings[user.id] = user_location
+    # print(user_location)
+    # print(location_strings)
+    store.join_journey(update.message.from_user.id, str(update.message.chat_id), str(update.message.location), car=False, car_capacity=1)
+    store.print_all_db()
     await update.message.reply_text("Send me dest:")
     return DEST
 
 async def dest(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     user_dest = update.message.text
+    store.set_journey_destination(str(update.message.chat_id), update.message.text)
+    store.print_all_db()
     await update.message.reply_text("At what time : (hh:mm) ")
     return TIME
 
 async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     user_time = update.message.text
+    store.set_journey_deadline_time(str(update.message.chat_id), user_time)
+    store.print_all_db()
     return ConversationHandler.END
-
-# async def manage_loc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-#     """Plans a trip."""
-#     query = update.callback_query
-#     keyboard = [
-#         [InlineKeyboardButton("Input Gare", callback_data='manage_loc', pay=True),
-#     ]
-#     reply_markup = InlineKeyboardMarkup(keyboard)
-#     print("eyyyy")
-#     await query.edit_message_text('Where are you going from ?', reply_markup=reply_markup)
-#     return WAIT_STRING
 
 async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.edit_message_text(text="next time")
     return ConversationHandler.END
 
+WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END = range(5)
+
+async def join_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Plans a trip."""
+    query = update.message
+    keyboard = [
+        [InlineKeyboardButton("Input Gare", callback_data='int_take_string_spec', pay=True),
+         InlineKeyboardButton("Send GeoLoc", callback_data='int_take_geo_pos_spec', pay=True)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    planid = str(query.chat_id)
+    await query.reply_text('Where are you going from ?', reply_markup=reply_markup)
+    return GIVE_LOC_SPEC
+
+async def int_take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Echo the user message."""
+    await update.callback_query.edit_message_text("Where are you:")
+    return WAIT_STRING_SPEC
+
+async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Echo the user message."""
+    location_strings[update.message.from_user.id] = update.message.text
+    store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
+    store.print_all_db()
+    
+    return ConversationHandler.END
+
+async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # user = update.message.from_user
+    # user_location = update.message.location
+    # location_strings[user.id] = user_location
+    # print(user_location)
+    # print(location_strings)
+    store.join_journey(update.message.from_user.id, str(update.message.chat_id), str(update.message.location), car=False, car_capacity=1)
+    store.print_all_db()
+    return ConversationHandler.END
+
+async def int_take_geo_pos_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
+    return WAIT_LOC_SPEC
+
+# async def spec_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+#     await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
+#     return WAIT_LOC_SPEC
 
 def main() -> None:
     """Start the bot."""
@@ -234,17 +291,14 @@ def main() -> None:
         entry_points=[CommandHandler("plan_trip", plan_trip)],
         states={
             CHOOSE_MONTH: [
-                CallbackQueryHandler(select_month, pattern="^" + str("select_month") + "$"),
-                #CallbackQueryHandler(two, pattern="^" + str(TWO) + "$"),
-                #CallbackQueryHandler(three, pattern="^" + str(THREE) + "$"),
-                #CallbackQueryHandler(four, pattern="^" + str(FOUR) + "$"),
+                CallbackQueryHandler(select_month, pattern="^" + str("select_month")+"*"),
             ],
             CHOOSE_DAY: [
                 #CallbackQueryHandler(start_over, pattern="^" + str(ONE) + "$"),
-                CallbackQueryHandler(select_day, pattern="^" + str("select_day") + "$"),
+                CallbackQueryHandler(select_day, pattern=r'^select_day([A-Za-z]{3})$'),
             ],
             CHOOSE_INPUT_METH: [
-                CallbackQueryHandler(choose_starting_point, pattern="^"+str("give_location")+"$")
+                CallbackQueryHandler(choose_starting_point, pattern=r'^give_location(30|[1-9]|[12]\d)$')
             ],
             GIVE_LOC: [
                 CallbackQueryHandler(int_take_string, pattern="^"+str("int_take_string")+"$"),
@@ -267,28 +321,22 @@ def main() -> None:
         allow_reentry=True
     )
 
-    async def join_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        """Joins a trip."""
-        keyboard = [
-            [InlineKeyboardButton("Select Date", callback_data='select_month', pay=True)]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        print("eyyyy")
-        planid = str(update.message.chat_id)
-        print(planid)
-        store.add_journey_id(planid)
-        store.print_all_db()
-        await update.message.reply_text('Welcome! Click the button below to select a date:', reply_markup=reply_markup)
-        return CHOOSE_MONTH
-
     conv_handler_join = ConversationHandler(
         entry_points=[CommandHandler("join_trip", join_trip)],
         states={
-            CHOOSE_MONTH: [
+            WAIT_OTHERS: [
                 CallbackQueryHandler(select_month, pattern="^" + str("select_month") + "$"),
             ],
-            CHOOSE_DAY: [
-              
+            GIVE_LOC_SPEC:[
+                CallbackQueryHandler(int_take_string_spec, pattern="^"+str("int_take_string_spec")+"$"),
+                CallbackQueryHandler(int_take_geo_pos_spec, pattern="^"+str("int_take_geo_pos_spec")+"$")
+            ],
+            WAIT_STRING_SPEC: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, take_string_spec)
+            ],
+            WAIT_LOC_SPEC: [ 
+                MessageHandler(filters.LOCATION, location_spec),
+            ]
         },
         fallbacks=[CommandHandler("start", start)],
         allow_reentry=True
@@ -296,6 +344,7 @@ def main() -> None:
 
     # Add ConversationHandler to application that will be used for handling updates
     application.add_handler(conv_handler)
+    application.add_handler(conv_handler_join)
 
     store.init_db()
 

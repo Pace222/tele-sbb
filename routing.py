@@ -1,27 +1,23 @@
 from api_sbb.sbb_priv import API_URL, PARKINGS, get_token, get_id_by_name, direct_p2p_meters
 from typing import List, Union
-from isodate import parse_duration
 
 import requests
 
 from api_maps.api_maps import car_p2p
 from state.user_in_trip import UserInTrip
 
-THEORETICAL_DIRECT_SPEED = 150 / 3.6  # km/h in m/s
+THEORETICAL_DIRECT_SPEED = 150 / 3.6 # km/h in m/s
 
 
 class TripInfo:
 
-    def __init__(self, legs, duration):
+    def __init__(self, legs):
         stops = [l['serviceJourney']['stopPoints'] for l in legs if l['type'] == 'PTRideLeg']
         self.stops = [[s['place']['name'] for s in (stop[0], stop[-1])] for stop in stops]
         self.start = self.stops[0][0]
         self.end = self.stops[-1][1]
         self.start_time = legs[0]['serviceJourney']['stopPoints'][0]['departure']['timeAimed']
         self.stop_time = legs[-1]['serviceJourney']['stopPoints'][-1]['arrival']['timeAimed']
-
-        self.duration = int(parse_duration(duration).total_seconds())
-
 
 
 class Parking:
@@ -38,8 +34,8 @@ class Parking:
         return hash(self.__attrs())
 
 
-def get_trips(origin: Union[str, List[float]], destination: Union[str, List[float]], date: str = None, time: str = None,
-              for_arrival: bool = False) -> List[TripInfo]:
+def get_trip(origin: Union[str, List[float]], destination: Union[str, List[float]], date: str = None, time: str = None,
+             for_arrival: bool = False) -> TripInfo:
     auth = get_token()['access_token']
     headers = {
         'Authorization': f"Bearer {auth}",
@@ -64,16 +60,13 @@ def get_trips(origin: Union[str, List[float]], destination: Union[str, List[floa
 
     trips = requests.post(f"{API_URL}/v3/trips/by-origin-destination", headers=headers, json=content).json()[
         "trips"]
-
-    return [TripInfo(t['legs'], t['duration']) for t in trips]
-
-
-def sbb_p2p(origin: List[float], destination: List[float], date: str = None, time: str = None,) -> int:
-    trips = get_trips(origin, destination, date, time, for_arrival=True)
     if len(trips) == 0:
-        return -1
+        raise ValueError("No trip was found")
 
-    return min(trips, key=lambda t: t.duration).duration
+    return TripInfo(trips[0]['legs'])
+
+
+
 
 
 def parking_dists_to_coords(r: float, user: UserInTrip):
@@ -81,9 +74,10 @@ def parking_dists_to_coords(r: float, user: UserInTrip):
         lambda park_coords: direct_p2p_meters(user.getLonLat(), park_coords)) < r * THEORETICAL_DIRECT_SPEED]
 
     if user.car:
-        return remaining_parks.apply(lambda park_coords: car_p2p(user.getLonLat(), park_coords))
+        return remaining_parks.apply(lambda park_coords: car_p2p(user.getLonLat(), park_coords)[0])
     else:
-        return remaining_parks.apply(lambda park_coords: sbb_p2p(user.getLonLat(), park_coords))
+        # TODO: call SBB
+        return
 
 
 # def closest_k_parks(k: int, user: UserInTrip) -> List[Parking]:
@@ -92,7 +86,7 @@ def parking_dists_to_coords(r: float, user: UserInTrip):
 
 
 def parks_in_radius(r: float, user: UserInTrip) -> List[Parking]:
-    return PARKINGS[0 < parking_dists_to_coords(r, user) < r].apply(lambda row: Parking(row), axis=1).to_list()
+    return PARKINGS[parking_dists_to_coords(r, user) < r].apply(lambda row: Parking(row), axis=1).to_list()
 
 
 def optimal_station(users: List[UserInTrip]) -> Parking:
@@ -112,4 +106,4 @@ def optimal_station(users: List[UserInTrip]) -> Parking:
 
 
 if __name__ == '__main__':
-    print(get_trips("Lausanne", "Zürich HB", time="16:20"))
+    print(get_trip("Lausanne", "Zürich HB", time="16:20"))
