@@ -192,6 +192,7 @@ async def take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     """Echo the user message."""
     location_strings[update.message.from_user.id] = update.message.text
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
+    store.set_user_name(update.message.from_user.id, update.message.from_user.username)
     store.print_all_db()
     await update.message.reply_text("Send me dest:")
     return DEST
@@ -207,6 +208,7 @@ async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # print(user_location)
     # print(location_strings)
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), f"{user_location.latitude},{user_location.longitude}", car=False, car_capacity=1)
+    store.set_user_name(update.message.from_user.id, update.message.from_user.username)
     store.print_all_db()
     await update.message.reply_text("Send me dest:")
     return DEST
@@ -276,6 +278,7 @@ async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     """Echo the user message."""
     location_strings[update.message.from_user.id] = update.message.text
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
+    store.set_user_name(update.message.from_user.id, update.message.from_user.username)
     store.print_all_db()
     keyboard = [
         [InlineKeyboardButton("Yes", callback_data='have_car_spec', pay=True),
@@ -293,6 +296,7 @@ async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # print(user_location)
     # print(location_strings)
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), f"{user_location.latitude},{user_location.longitude}", car=False, car_capacity=1)
+    store.set_user_name(update.message.from_user.id, update.message.from_user.username)
     store.print_all_db()
     keyboard = [
         [InlineKeyboardButton("Yes", callback_data='have_car_spec', pay=True),
