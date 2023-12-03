@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from api_sbb.sbb_priv import API_URL, PARKINGS, get_token, get_id_by_name, direct_p2p_meters
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional
 from isodate import parse_duration
 
 import requests
@@ -94,7 +94,8 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str):
 #    return park_to_coords[(0 < park_to_coords) & (park_to_coords < r)].apply(lambda row: Parking(row), axis=1).to_list()
 
 
-def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None) -> Tuple[Parking, List[Union[Tuple[str, str], TripInfo]]]:
+# Union[Tuple[str,str], TripInfo]]
+def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None) -> Optional[Tuple[Parking, List[Union[Tuple[str, str], TripInfo]]]]:
     dists_users_parks = {u: parking_dists_to_coords(u, date, time) for u in users}
     if any([len(v) == 0 for v in dists_users_parks.values()]):
         return None
