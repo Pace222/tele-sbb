@@ -253,7 +253,7 @@ async def no_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.callback_query.edit_message_text(text='Poor')
     return ConversationHandler.END
 
-WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END, COMPUTE = range(6)
+WAIT_OTHERS, GIVE_LOC_SPEC, WAIT_STRING_SPEC, WAIT_LOC_SPEC, SPEC_END, COMPUTE, CAR_MAYBE_SPEC, CAR_WIEVIEL_SPEC = range(8)
 
 async def join_trip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Plans a trip."""
@@ -277,14 +277,14 @@ async def take_string_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     location_strings[update.message.from_user.id] = update.message.text
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
     store.print_all_db()
-    cnt = store.count_journey_users(str(update.message.chat_id))
-    if (cnt >= 2):
-        a = solve_planning(str(update.message.chat_id))
-        if a is not None:
-            plan, train_card = prepare_planning_v1(*a)
-            await update.message.reply_text(str(plan))
-            await update.message.reply_photo(train_card)
-    return ConversationHandler.END
+    keyboard = [
+        [InlineKeyboardButton("Yes", callback_data='have_car_spec', pay=True),
+         InlineKeyboardButton("No", callback_data='no_car_spec', pay=True)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    store.print_all_db()
+    await update.message.reply_text(text='Do you have a car ? ', reply_markup=reply_markup)
+    return CAR_MAYBE_SPEC
 
 async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # user = update.message.from_user
@@ -293,6 +293,32 @@ async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # print(user_location)
     # print(location_strings)
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), f"{user_location.latitude},{user_location.longitude}", car=False, car_capacity=1)
+    store.print_all_db()
+    keyboard = [
+        [InlineKeyboardButton("Yes", callback_data='have_car_spec', pay=True),
+         InlineKeyboardButton("No", callback_data='no_car_spec', pay=True)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    store.print_all_db()
+    await update.message.reply_text(text='Do you have a car ? ', reply_markup=reply_markup)
+    return CAR_MAYBE_SPEC
+
+async def int_take_geo_pos_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
+    return WAIT_LOC_SPEC
+
+async def have_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # user = update.callback_query.from_user
+    # user_time = update.message.text
+    await update.callback_query.edit_message_text(text='What is your capacity ?')
+    return CAR_WIEVIEL_SPEC
+
+async def handle_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.message.from_user.id 
+    jrn = update.message.chat_id
+    numm = update.message.text 
+    store.update_user_car(user, jrn, True)
+    store.update_user_car_capacity(user, jrn, int(numm))
     store.print_all_db()
     cnt = store.count_journey_users(str(update.message.chat_id))
     if (cnt >= 2):
@@ -303,9 +329,18 @@ async def location_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             await update.message.reply_photo(train_card)
     return ConversationHandler.END
 
-async def int_take_geo_pos_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
-    return WAIT_LOC_SPEC
+async def no_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    store.update_user_car(update.callback_query.from_user.id, update.callback_query.message.chat_id, False)
+    store.print_all_db()
+    await update.callback_query.edit_message_text(text='Poor')
+    cnt = store.count_journey_users(str(update.callback_query.message.chat_id))
+    if (cnt >= 2):
+        a = solve_planning(str(update.callback_query.message.chat_id))
+        if a is not None:
+            plan, train_card = prepare_planning_v1(*a)
+            await update.message.reply_text(str(plan))
+            await update.message.reply_photo(train_card)
+    return ConversationHandler.END
 
 # async def spec_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 #     await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
@@ -379,6 +414,13 @@ def main() -> None:
             ],
             WAIT_LOC_SPEC: [ 
                 MessageHandler(filters.LOCATION, location_spec),
+            ],
+            CAR_MAYBE_SPEC: [
+                CallbackQueryHandler(have_car_spec, pattern="^"+str("have_car_spec")+"$"),
+                CallbackQueryHandler(no_car_spec, pattern="^"+str("no_car_spec")+"$")
+            ],
+            CAR_WIEVIEL_SPEC: [
+                MessageHandler(filters.TEXT, handle_car_spec)
             ],
             COMPUTE: [
 
