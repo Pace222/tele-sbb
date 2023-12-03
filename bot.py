@@ -324,33 +324,39 @@ async def handle_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     store.update_user_car(user, jrn, True)
     store.update_user_car_capacity(user, jrn, int(numm))
     store.print_all_db()
-    cnt = store.count_journey_users(str(update.message.chat_id))
-    if (cnt >= 2):
-        a = solve_planning(str(update.message.chat_id))
-        if a is not None:
-            plan, train_card = prepare_planning_v1(*a)
-            await update.message.reply_text(str(plan))
-            await update.message.reply_photo(train_card)
-    store.flush_db()
+    # cnt = store.count_journey_users(str(update.message.chat_id))
+    # if (cnt >= 2):
+    #     a = solve_planning(str(update.message.chat_id))
+    #     if a is not None:
+    #         plan, train_card = prepare_planning_v1(*a)
+    #         await update.message.reply_text(str(plan))
+    #         await update.message.reply_photo(train_card)
     return ConversationHandler.END
 
 async def no_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     store.update_user_car(update.callback_query.from_user.id, update.callback_query.message.chat_id, False)
     store.print_all_db()
     await update.callback_query.edit_message_text(text='Poor')
-    cnt = store.count_journey_users(str(update.callback_query.message.chat_id))
-    if (cnt >= 2):
-        a = solve_planning(str(update.callback_query.message.chat_id))
-        if a is not None:
-            plan, train_card = prepare_planning_v1(*a)
-            await update.callback_query.message.reply_text(str(plan))
-            await update.callback_query.message.reply_photo(train_card)
-    store.flush_db()
+    # cnt = store.count_journey_users(str(update.callback_query.message.chat_id))
+    # if (cnt >= 2):
+    #     a = solve_planning(str(update.callback_query.message.chat_id))
+    #     if a is not None:
+    #         plan, train_card = prepare_planning_v1(*a)
+    #         await update.callback_query.message.reply_text(str(plan))
+    #         await update.callback_query.message.reply_photo(train_card)
     return ConversationHandler.END
 
-# async def spec_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-#     await update.callback_query.edit_message_text("SEEEEEEND ME your LOCAATion:, lets focus on commincatinggggg")
-#     return WAIT_LOC_SPEC
+async def tell_us(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    store.print_all_db()
+    await update.message.reply_text(str("Solving ..."))
+    a = solve_planning(str(update.message.chat_id))
+    if a is not None:
+        await update.message.reply_text(str("Planning ..."))
+        plan, train_card = prepare_planning_v1(*a)
+        await update.message.reply_text(str("Printing ..."))
+        await update.message.reply_text(str(plan))
+        await update.message.reply_photo(train_card)
+        store.flush_db()
 
 def main() -> None:
     """Start the bot."""
@@ -360,6 +366,7 @@ def main() -> None:
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("tell_us", tell_us))
 
     # on non command i.e message - echo the message on Telegram
     #application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
