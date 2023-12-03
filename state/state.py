@@ -103,6 +103,11 @@ def get_journey_users(journey_id: str) -> List[UserInTrip]:
         return [UserInTrip(*r) for r in res]
 
 
+def count_journey_users(journey_id: str) -> int:
+    with sqlite3.connect('state.sqlite') as con:
+        return con.execute("SELECT COUNT(*) FROM user_journeys WHERE journey_id = ?", (journey_id,)).fetchone()[0]
+
+
 def remove_journey(journey_id: str):
     with sqlite3.connect('state.sqlite') as con:
         con.execute("DELETE FROM journeys WHERE journey_id = ?", (journey_id,))
