@@ -116,7 +116,7 @@ def optimal_parking(users: List[UserInTrip], date: str, time: str, destination: 
     for u in users:
         if not (u.location[0] == '[' and u.location[-1] == ']'):
             try:
-                u.location = str(get_coords_by_name(get_token()['access_token'], u.location))
+                u.location = str(get_coords_by_name(get_token()['access_token'], u.location))[1:-1]
             except ValueError:
                 # TODO: handle
                 return None
