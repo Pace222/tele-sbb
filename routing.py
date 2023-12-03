@@ -189,7 +189,8 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
         if len(passengers) == 0:
             start = plus_times(date, time, -car_p2p(driver.getLatLon(), parking.coords))
         else:
-            start = plus_times(date, time, -sum([d for n, d in car_past[driver].items()]) - passengers[-1][1])
+            last_pass, last_track = passengers[-1]
+            start = plus_times(date, time, -car_past[driver][last_pass] - last_track)
         passenger_timings = []
         for p, dt in zip(passengers, car_past[driver]):
             time = start + timedelta(seconds=dt)
