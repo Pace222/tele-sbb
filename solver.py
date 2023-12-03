@@ -30,7 +30,6 @@ def solve_planning(journey_id: str) -> \
 
         # dict[driver, tuple[start_time, list[tuple[passenger, pick_up_time]]]]
         drivers_sol: Dict[UserInTrip, Tuple[str, List[Tuple[UserInTrip, str]]]] = share_cars(users, parking, date, time)
-        print(drivers_sol.items())
 
         user_plan_v2 = []
 
@@ -68,8 +67,6 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     dest_name = parking.name
     instructions = [f"=== Trip to: {final_train.end} ===\n\nPassengers will first meet-up at {parking.name}:\n"]
 
-    print("Drivers:")
-    print(drivers.items())  # TODO remove
     # Driver
     for driver, (start_time, passengers_n_time) in drivers.items():
         #  (check how many passengers)
