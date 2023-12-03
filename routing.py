@@ -199,10 +199,8 @@ def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str) 
             last_pass, last_track = passengers[-1]
             start = plus_times(date, time, -car_past[driver][last_pass] - last_track)
         passenger_timings = []
-        for p, dt in zip(passengers, car_past[driver]):
-            #print(dt)
-            #print(p)
-            time = start + timedelta(seconds=dt[p[0]])
+        for p in zip(passengers):
+            time = start + timedelta(seconds=car_past[driver][p[0]])
             passenger_timings.append((p, time.strftime("%Y-%m-%d %H:%M")))
         timings_per_driver[driver] = (start.strftime("%Y-%m-%d %H:%M"), passenger_timings)
 
