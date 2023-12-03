@@ -71,13 +71,13 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
     for driver, (start_time, passengers_n_time) in drivers.items():
         #  (check how many passengers)
         if len(passengers_n_time) == 0:
-            instructions.append(f"[{id_to_nametag(driver.user_id)}] Drive - from {driver.location} to {dest_name} P+R\n")
+            instructions.append(f"[{id_to_nametag(driver.user_id)}] Drive - From {driver.location} To {dest_name} P+R\n")
         else:
-            passengers_text = ' - ' + ' - \n'.join([f"{id_to_nametag(pt[0].user_id)} @ "
-                                                    f"{pt[1]}" for pt in passengers_n_time])
+            passengers_text = ' - ' + '\n - '.join([f"{id_to_nametag(pt[0].user_id)} @ "
+                                                    f"{cleanerTimeMin(pt[1])}" for pt in passengers_n_time])
             instructions.append(f"[{id_to_nametag(driver.user_id)}] Car sharing (driver) - From: {driver.location} @ "
-                                f"{start_time}, "
-                                f" To: {dest_name}"  # @ {trip.stop_time}"  # TODO add arrival time also??
+                                f"{cleanerTimeMin(start_time)}, "
+                                f" To: {dest_name}\n"  # @ {trip.stop_time}"  # TODO add arrival time also??
                                 f"Pick-up passengers:\n{passengers_text}\n")
 
     # Passengers or TP
@@ -89,22 +89,22 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
             via_string = ""
             if len(trip.stops) > 2:
                 via_string = ', via: ' + ','.join([s[0] for s in trip.stops[1:-1]])
-            instructions.append(f"[{user_name}] Public transport - From:{trip.start} @ {cleanerTimeSec(trip.start_time)} "
+            instructions.append(f"[{user_name}] Public transport - From: {trip.start} @ {cleanerTimeSec(trip.start_time)} "
                                 f"to {trip.end} @ {cleanerTimeSec(trip.stop_time)}{via_string}\n")
         elif isinstance(trip, Tuple):
             # Case of passenger
             instructions.append(f"[{user_name}] Car sharing (passenger), driver = [{id_to_nametag(trip[0].user_id)}],"
-                                f" pick-up from:"
-                                f"{user.location} @ {cleanerTimeSec(trip[1])}\n")
+                                f" pick-up from: {user.location} @ {cleanerTimeMin(trip[1])}\n")
 
-    instructions.append(f"[Final] Public transport - From:{final_train.start} @ {cleanerTimeSec(final_train.start_time)} "
+    instructions.append(f"[Final] Public transport - From: {final_train.start} @ {cleanerTimeSec(final_train.start_time)} "
                         f"to {final_train.end} @ {cleanerTimeSec(final_train.stop_time)}")
 
     train_card_location = generate_train_card(final_train.start, final_train.end, cleanerTimeSec(final_train.start_time),
                                               cleanerTimeSec(final_train.stop_time))
 
     print(train_card_location)
-    instructions.append("\n You will all be there on time to take the train together!")
+    instructions.append("\n You will all be there on time to take the train together!\n"
+                        "Here's the train you'll take together ;)")
     plan = "\n".join(instructions)
     store.set_journey_plan(journey.journey_id, plan)
 
