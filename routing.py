@@ -97,8 +97,7 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str):
 
 
 # Union[Tuple[str,str], TripInfo]]
-def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None) -> Optional[
-    Tuple[Parking, List[Union[Tuple[str, str], TripInfo]]]]:
+def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None) -> Optional[Parking]:
     dists_users_parks = {u: parking_dists_to_coords(u, date, time) for u in users}
     if any([len(v) == 0 for v in dists_users_parks.values()]):
         return None
@@ -125,20 +124,7 @@ def optimal_parking(users: List[UserInTrip], date: str = None, time: str = None)
         return len(distances), -sum(distances)
 
     best_parking = Parking(PARKINGS.loc[max(distances_to_park, key=custom_max)])
-
-    datetime_str = f"{date if date else datetime.now().date()} {time}"
-    combined_dt = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
-    leave = []
-    for u in users:
-        if u.car:
-            t = combined_dt - timedelta(seconds=car_p2p(u.getLatLon(), best_parking.coords))
-            leave_date = t.strftime("%Y-%m-%d")
-            leave_time = t.strftime("%H:%M")
-            leave.append((leave_date, leave_time))
-        else:
-            t = get_trips(u.getLatLon(), best_parking.coords, date, time, for_arrival=True)[0]
-            leave.append(t)
-    return best_parking, leave
+    return best_parking
 
 
 def share_cars(users: List[UserInTrip], parking: Parking, date: str, time: str):
