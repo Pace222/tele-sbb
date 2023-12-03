@@ -317,7 +317,7 @@ async def int_take_geo_pos_spec(update: Update, context: ContextTypes.DEFAULT_TY
 async def have_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # user = update.callback_query.from_user
     # user_time = update.message.text
-    await update.callback_query.edit_message_text(text='What is your capacity ?')
+    await update.callback_query.edit_message_text(text='What is your car capacity ?')
     return CAR_WIEVIEL_SPEC
 
 async def handle_car_spec(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
