@@ -94,7 +94,6 @@ def parking_dists_to_coords(user: UserInTrip, date: str, time: str, destination:
                 trip = get_trips(park_coords, destination, date, time, for_arrival=True)[-1]
                 start_time = datetime.fromisoformat(trip.start_time)
                 start_date, start_time = start_time.date().strftime("%Y-%m-%d"), start_time.time().strftime("%H:%M")
-                # TODO: remove start_date, start_time
                 return sbb_p2p(user.getLatLon(), park_coords, start_date, start_time), start_date, start_time, trip
 
             dists = remaining_parks.apply(dists_from_coords)

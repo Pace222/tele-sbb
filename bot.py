@@ -76,7 +76,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_text("Help!")
+    await update.message.reply_text("Telegram SBB bot:\n \t- /plan_trip: Start planning a trip. \n "
+                                    "\t- /join_trip: Join a trip. \n \t- /tell_us: Reveal the computed planning."
+                                    "\n Happy Traveling!")
+
 
 async def select_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
@@ -194,7 +197,7 @@ async def take_string(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), update.message.text, car=False, car_capacity=1)
     store.set_user_name(update.message.from_user.id, update.message.from_user.username)
     store.print_all_db()
-    await update.message.reply_text("Send me dest:")
+    await update.message.reply_text("Send me your destination:")
     return DEST
 
 async def int_take_geo_pos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -210,7 +213,7 @@ async def location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     store.join_journey(update.message.from_user.id, str(update.message.chat_id), f"{user_location.latitude},{user_location.longitude}", car=False, car_capacity=1)
     store.set_user_name(update.message.from_user.id, update.message.from_user.username)
     store.print_all_db()
-    await update.message.reply_text("Send me dest:")
+    await update.message.reply_text("Send me your destination:")
     return DEST
 
 async def dest(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -218,7 +221,7 @@ async def dest(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_dest = update.message.text
     store.set_journey_destination(str(update.message.chat_id), update.message.text)
     store.print_all_db()
-    await update.message.reply_text("At what time : (hh:mm) ")
+    await update.message.reply_text("At what time do you want to arrive: (hh:mm) ")
     return TIME
 
 async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -237,7 +240,7 @@ async def time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def have_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # user = update.callback_query.from_user
     # user_time = update.message.text
-    await update.callback_query.edit_message_text(text='What is your capacity ?')
+    await update.callback_query.edit_message_text(text='What is your car capacity ?')
     return CAR_WIEVIEL
 
 async def handle_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -351,9 +354,7 @@ async def tell_us(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(str("Solving ..."))
     a = solve_planning(str(update.message.chat_id))
     if a is not None:
-        await update.message.reply_text(str("Planning ..."))
         plan, train_card = prepare_planning_v1(*a)
-        await update.message.reply_text(str("Printing ..."))
         await update.message.reply_text(str(plan))
         await update.message.reply_photo(train_card)
         store.flush_db()

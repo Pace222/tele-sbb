@@ -18,7 +18,7 @@ def solve_planning(journey_id: str) -> \
     time = journey.deadline_time
     destination = journey.destination
 
-    # TODO solve "year problem"
+    # fixed for 2024
     date = f"2024-{month}-{day}"
 
     solution_v1 = optimal_parking(users, date, time, destination, True)
@@ -78,7 +78,7 @@ def prepare_planning_v1(journey, parking, drivers: Dict[UserInTrip, Tuple[str, L
                                                     f"{cleanerTimeMin(pt[1])}" for pt in passengers_n_time])
             instructions.append(f"[{id_to_nametag(driver.user_id)}] Car sharing (driver) - From: {driver.location} @ "
                                 f"{cleanerTimeMin(start_time)}, "
-                                f" To: {dest_name} @ {cleanerTimeMin(arrival_midtime)}\n"  # TODO add arrival time also??
+                                f" To: {dest_name} @ {cleanerTimeMin(arrival_midtime)}\n"
                                 f"Pick-up passengers:\n{passengers_text}\n")
 
     # Passengers or TP
